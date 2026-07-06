@@ -1,12 +1,12 @@
-import { Schema, model, models } from "mongoose";
+import { Schema, model, models, InferSchemaType } from "mongoose";
 
 const UserSchema = new Schema(
   {
     username: {
       type: String,
       required: true,
-      unique: true,
       trim: true,
+      unique: true,
       minlength: 3,
       maxlength: 30,
     },
@@ -14,36 +14,31 @@ const UserSchema = new Schema(
     email: {
       type: String,
       required: true,
-      unique: true,
-      lowercase: true,
       trim: true,
+      lowercase: true,
+      unique: true,
     },
 
-    password: {
+    passwordHash: {
       type: String,
       required: true,
     },
 
-    verified: {
+    emailVerified: {
       type: Boolean,
-      default: false,
-    },
-
-    verificationToken: {
-      type: String,
-      default: null,
-    },
-
-    verificationTokenExpiresAt: {
-      type: Date,
-      default: null,
+      default: true,
     },
   },
   {
     timestamps: true,
+    versionKey: false,
   }
 );
 
-const User = models.User || model("User", UserSchema);
+UserSchema.index({ email: 1 });
+UserSchema.index({ username: 1 });
 
-export default User;
+export type UserDocument = InferSchemaType<typeof UserSchema>;
+
+export const User =
+  models.User || model("User", UserSchema);
