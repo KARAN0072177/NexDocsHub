@@ -1,7 +1,7 @@
-export default function Home() {
+export default function LoginPage() {
   return (
     <main className="flex min-h-screen items-center justify-center">
-      <h1 className="text-3xl font-bold">NexDocsHub</h1>
+      <h1 className="text-3xl font-bold">Hello Login</h1>
     </main>
   );
 }
