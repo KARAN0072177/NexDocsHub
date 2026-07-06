@@ -18,7 +18,7 @@ export async function sendVerificationEmail({
   verificationToken,
 }: SendVerificationEmailParams) {
   const verificationUrl =
-  `${APP_CONFIG.URL}/verify-email?token=${verificationToken}`;
+  `${APP_CONFIG.URL}/api/auth/verify-email?token=${verificationToken}`;
 
   const html = await render(
     VerifyEmail({

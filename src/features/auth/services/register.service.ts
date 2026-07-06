@@ -17,15 +17,16 @@ class RegisterService {
   ): Promise<ServiceResult<{ email: string }>> {
     const validation = registerSchema.safeParse(input);
 
-    if (!validation.success) {
-      return {
-        success: false,
-        error: {
-          code: "VALIDATION_ERROR",
-          message: validation.error.issues[0].message,
-        },
-      };
-    }
+if (!validation.success) {
+  return {
+    success: false,
+    error: {
+      code: "VALIDATION_ERROR",
+      message: "Please correct the highlighted fields.",
+      fieldErrors: validation.error.flatten().fieldErrors,
+    },
+  } as ServiceResult<{ email: string }>;
+}
 
     const { username, email, password } = validation.data;
 
