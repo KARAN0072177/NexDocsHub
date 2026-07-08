@@ -35,6 +35,7 @@ interface Entry {
   createdAt: string;
   updatedAt: string;
   customType?: string;
+  format?: "note" | "files";
 }
 
 interface EntryListProps {

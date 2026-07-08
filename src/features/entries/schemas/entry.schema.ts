@@ -43,6 +43,7 @@ export const entrySchema = z.object({
     .trim()
     .max(30, "Custom type name cannot exceed 30 characters.")
     .optional(),
+  format: z.enum(["note", "files"]).default("note"),
 }).refine(
   (data) => {
     if (data.type === "custom" && (!data.customType || data.customType.trim() === "")) {

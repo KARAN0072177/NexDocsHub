@@ -35,6 +35,7 @@ interface Entry {
   createdAt: string;
   updatedAt: string;
   customType?: string;
+  format?: "note" | "files";
 }
 
 interface EntryDetailProps {
@@ -196,16 +197,24 @@ export function EntryDetail({
         <div className="border-t border-neutral-900" />
 
         {/* Content body */}
-        <div className="prose prose-invert max-w-none text-neutral-300 leading-relaxed font-sans min-h-[150px]">
-          {htmlContent ? (
-            <div
-              dangerouslySetInnerHTML={{ __html: htmlContent }}
-              className="space-y-4"
-            />
-          ) : (
-            <p className="text-neutral-600 text-sm italic">No content text.</p>
-          )}
-        </div>
+        {entry.format !== "files" && (
+          <div className="prose prose-invert max-w-none text-neutral-300 leading-relaxed font-sans min-h-[150px]">
+            {htmlContent ? (
+              <div
+                dangerouslySetInnerHTML={{ __html: htmlContent }}
+                className="space-y-4"
+              />
+            ) : (
+              <p className="text-neutral-600 text-sm italic">No content text.</p>
+            )}
+          </div>
+        )}
+
+        {entry.format === "files" && entry.attachments.length === 0 && (
+          <div className="flex flex-col items-center justify-center p-8 text-center border border-dashed border-neutral-900 rounded-xl bg-neutral-900/5">
+            <p className="text-sm text-neutral-500 italic">This vault contains no document files yet. Click &ldquo;Edit&rdquo; to add some.</p>
+          </div>
+        )}
 
         {/* Attachments Section */}
         {entry.attachments.length > 0 && (

@@ -178,7 +178,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { categoryId, title, content, type, tags, attachments, customType } =
+    const { categoryId, title, content, type, tags, attachments, customType, format } =
       validation.data;
 
     // Verify category exists and belongs to user
@@ -209,9 +209,10 @@ export async function POST(request: NextRequest) {
     // Create entry under the category workspace
     const newEntry = await Entry.create({
       title,
-      content,
+      content: format === "files" ? "" : content,
       type,
       customType: type === "custom" ? customType : undefined,
+      format,
       tags,
       attachments: cleanAttachments,
       categoryId,

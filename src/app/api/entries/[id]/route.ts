@@ -160,7 +160,7 @@ export async function PUT(
       );
     }
 
-    const { categoryId, title, content, type, tags, attachments, customType } =
+    const { categoryId, title, content, type, tags, attachments, customType, format } =
       validation.data;
 
     // Verify entry exists and belongs to user
@@ -231,9 +231,10 @@ export async function PUT(
 
     // Save updates (save clean S3 URLs in database)
     entry.title = title;
-    entry.content = content;
+    entry.content = format === "files" ? "" : content;
     entry.type = type;
     entry.customType = type === "custom" ? customType : undefined;
+    entry.format = format;
     entry.tags = tags;
     entry.attachments = cleanAttachments;
     entry.categoryId = category._id;

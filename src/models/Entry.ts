@@ -9,7 +9,6 @@ const EntrySchema = new Schema(
     },
     content: {
       type: String,
-      required: true,
       default: "",
     },
     type: {
@@ -31,6 +30,12 @@ const EntrySchema = new Schema(
     customType: {
       type: String,
       trim: true,
+    },
+    format: {
+      type: String,
+      enum: ["note", "files"],
+      default: "note",
+      required: true,
     },
     tags: {
       type: [String],

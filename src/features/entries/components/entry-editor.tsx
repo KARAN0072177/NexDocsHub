@@ -30,6 +30,7 @@ interface Entry {
   attachments: Attachment[];
   categoryId: string;
   customType?: string;
+  format?: "note" | "files";
 }
 
 interface EntryEditorProps {
@@ -56,6 +57,9 @@ export function EntryEditor({
   );
   const [customType, setCustomType] = useState(
     initialEntry?.customType ?? ""
+  );
+  const [format, setFormat] = useState(
+    initialEntry?.format ?? "note"
   );
 
   const [uploading, setUploading] = useState(false);
@@ -161,9 +165,10 @@ export function EntryEditor({
 
     const payload = {
       title: trimmedTitle,
-      content,
+      content: format === "files" ? "" : content,
       type,
       customType: type === "custom" ? customType : undefined,
+      format,
       tags,
       attachments,
       categoryId,
@@ -240,7 +245,7 @@ export function EntryEditor({
       {/* Workspace Split Panes */}
       <div className="flex flex-1 gap-6 overflow-hidden min-h-0">
         {/* Left Form Editor */}
-        <form className="flex flex-1 flex-col overflow-y-auto space-y-4 pr-1">
+        <form className={`flex flex-col overflow-y-auto space-y-4 pr-1 ${format === "files" ? "w-full max-w-2xl mx-auto" : "flex-1"}`}>
           {/* Title input */}
           <div>
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-neutral-400">
@@ -254,6 +259,37 @@ export function EntryEditor({
               disabled={isSubmitting}
               className="w-full rounded-lg border border-neutral-900 bg-neutral-900/10 px-4 py-2.5 text-white outline-none transition focus:border-neutral-800 text-sm font-semibold"
             />
+          </div>
+
+          {/* Format Toggle Button Group */}
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-neutral-450">
+              Format
+            </label>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setFormat("note")}
+                className={`flex-1 rounded-lg border py-2 px-3 text-xs font-bold transition focus:outline-none ${
+                  format === "note"
+                    ? "bg-blue-600/10 border-blue-500/50 text-blue-400"
+                    : "bg-neutral-900/40 border-neutral-900 text-neutral-500 hover:text-neutral-300"
+                }`}
+              >
+                Markdown Document
+              </button>
+              <button
+                type="button"
+                onClick={() => setFormat("files")}
+                className={`flex-1 rounded-lg border py-2 px-3 text-xs font-bold transition focus:outline-none ${
+                  format === "files"
+                    ? "bg-blue-600/10 border-blue-500/50 text-blue-400"
+                    : "bg-neutral-900/40 border-neutral-900 text-neutral-500 hover:text-neutral-300"
+                }`}
+              >
+                Document Vault (Uploads Only)
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -379,38 +415,42 @@ export function EntryEditor({
           </div>
 
           {/* Markdown Content textarea */}
-          <div className="flex-1 flex flex-col min-h-[300px]">
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-neutral-400">
-              Content (Markdown)
-            </label>
-            <textarea
-              placeholder="Write your logs, decisions, notes here in Markdown format..."
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              disabled={isSubmitting}
-              className="w-full flex-1 rounded-lg border border-neutral-900 bg-neutral-900/10 p-4 text-white outline-none transition focus:border-neutral-800 text-sm font-mono leading-relaxed resize-none"
-            />
-          </div>
+          {format === "note" && (
+            <div className="flex-1 flex flex-col min-h-[300px]">
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-neutral-400">
+                Content (Markdown)
+              </label>
+              <textarea
+                placeholder="Write your logs, decisions, notes here in Markdown format..."
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                disabled={isSubmitting}
+                className="w-full flex-1 rounded-lg border border-neutral-900 bg-neutral-900/10 p-4 text-white outline-none transition focus:border-neutral-800 text-sm font-mono leading-relaxed resize-none"
+              />
+            </div>
+          )}
         </form>
 
         {/* Right Live HTML Preview */}
-        <div className="flex flex-1 flex-col overflow-hidden border border-neutral-900 rounded-xl bg-neutral-900/5 p-6">
-          <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-neutral-500 border-b border-neutral-900 pb-2">
-            Live Preview
-          </label>
-          <div className="flex-1 overflow-y-auto pr-1">
-            {content ? (
-              <div
-                dangerouslySetInnerHTML={{ __html: previewHtml }}
-                className="markdown-body prose prose-invert max-w-none text-sm text-neutral-300 leading-relaxed space-y-4 font-sans"
-              />
-            ) : (
-              <p className="text-neutral-600 text-sm italic mt-2">
-                Markdown preview will appear here as you type...
-              </p>
-            )}
+        {format === "note" && (
+          <div className="flex flex-1 flex-col overflow-hidden border border-neutral-900 rounded-xl bg-neutral-900/5 p-6">
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-neutral-500 border-b border-neutral-900 pb-2">
+              Live Preview
+            </label>
+            <div className="flex-1 overflow-y-auto pr-1">
+              {content ? (
+                <div
+                  dangerouslySetInnerHTML={{ __html: previewHtml }}
+                  className="markdown-body prose prose-invert max-w-none text-sm text-neutral-300 leading-relaxed space-y-4 font-sans"
+                />
+              ) : (
+                <p className="text-neutral-600 text-sm italic mt-2">
+                  Markdown preview will appear here as you type...
+                </p>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
