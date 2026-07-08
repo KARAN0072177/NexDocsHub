@@ -17,6 +17,10 @@ const CategorySchema = new Schema(
       ref: "User",
       required: true,
     },
+    isPinned: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

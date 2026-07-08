@@ -57,6 +57,7 @@ export default async function Home() {
   const plainCategories = categories.map((cat: any) => ({
     id: cat._id.toString() as string,
     name: cat.name as string,
+    isPinned: !!cat.isPinned,
   }));
 
   return (
