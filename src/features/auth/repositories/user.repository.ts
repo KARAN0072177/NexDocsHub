@@ -15,6 +15,10 @@ export class UserRepository {
 
         return user.toObject();
     }
+
+    async updatePassword(email: string, passwordHash: string) {
+        return User.updateOne({ email }, { passwordHash });
+    }
 }
 
 export const userRepository = new UserRepository();

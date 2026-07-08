@@ -15,6 +15,15 @@ function AuthBanners() {
   const searchParams = useSearchParams();
   const verified = searchParams.get("verified");
   const error = searchParams.get("error");
+  const reset = searchParams.get("reset");
+
+  if (reset === "true") {
+    return (
+      <div className="mb-6 rounded-lg border border-emerald-900 bg-emerald-950/40 p-3 text-sm text-emerald-400">
+        Password reset successfully. You can now log in with your new password.
+      </div>
+    );
+  }
 
   if (verified === "true") {
     return (
@@ -142,12 +151,20 @@ export function LoginForm() {
 
         {/* Password */}
         <div>
-          <label
-            htmlFor="password"
-            className="mb-2 block text-sm font-medium text-neutral-200"
-          >
-            Password
-          </label>
+          <div className="flex items-center justify-between mb-2">
+            <label
+              htmlFor="password"
+              className="text-sm font-medium text-neutral-200"
+            >
+              Password
+            </label>
+            <Link
+              href="/forgot-password"
+              className="text-xs text-neutral-400 hover:text-white transition"
+            >
+              Forgot password?
+            </Link>
+          </div>
 
           <input
             id="password"
