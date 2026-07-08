@@ -9,6 +9,8 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1081.0",
+    "@aws-sdk/s3-request-presigner": "^3.1081.0",
     "@base-ui/react": "^1.6.0",
     "@hookform/resolvers": "^5.4.0",
     "@react-email/components": "^1.0.12",
@@ -19,6 +21,7 @@
     "clsx": "^2.1.1",
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^1.23.0",
+    "marked": "^18.0.5",
     "mongoose": "^9.7.3",
     "nanoid": "^5.1.16",
     "next": "16.2.10",

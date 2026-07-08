@@ -1,14 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Folder, Plus, Search, FolderPlus } from "lucide-react";
 
 import { ProfileMenu } from "./profile-menu";
 import { CreateCategoryModal } from "./create-category-modal";
+import { EntryList } from "@/features/entries/components/entry-list";
+import { EntryEditor } from "@/features/entries/components/entry-editor";
+import { EntryDetail } from "@/features/entries/components/entry-detail";
 
 interface Category {
   id: string;
   name: string;
+}
+
+interface Attachment {
+  name: string;
+  url: string;
+  mimeType: string;
+  size: number;
+}
+
+interface Entry {
+  _id: string;
+  title: string;
+  content: string;
+  type: string;
+  tags: string[];
+  attachments: Attachment[];
+  categoryId: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface AppShellProps {
@@ -19,12 +41,24 @@ interface AppShellProps {
   initialCategories: Category[];
 }
 
+type ActiveView = "LIST" | "EDITOR" | "DETAIL";
+
 export function AppShell({ user, initialCategories }: AppShellProps) {
   const [categories, setCategories] = useState<Category[]>(initialCategories);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
-    null
+    initialCategories[0]?.id ?? null
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Entry flow states
+  const [view, setView] = useState<ActiveView>("LIST");
+  const [activeEntry, setActiveEntry] = useState<Entry | null>(null);
+
+  // Reset page views when active category switches
+  useEffect(() => {
+    setView("LIST");
+    setActiveEntry(null);
+  }, [selectedCategoryId]);
 
   const handleCreateSuccess = (newCategory: Category) => {
     setCategories((prev) => [newCategory, ...prev]);
@@ -36,7 +70,7 @@ export function AppShell({ user, initialCategories }: AppShellProps) {
   return (
     <div className="flex h-screen w-screen flex-col overflow-hidden bg-neutral-950 font-sans text-neutral-200 select-none">
       {/* Top Bar */}
-      <header className="flex h-16 items-center justify-between border-b border-neutral-900 bg-neutral-950 px-6 z-10">
+      <header className="flex h-16 items-center justify-between border-b border-neutral-900 bg-neutral-950 px-6 z-10 flex-shrink-0">
         {/* Logo */}
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 font-bold text-white shadow-lg shadow-blue-500/20">
@@ -65,7 +99,7 @@ export function AppShell({ user, initialCategories }: AppShellProps) {
       {/* Main Container */}
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
-        <aside className="flex w-64 flex-col border-r border-neutral-900 bg-neutral-950/20 p-4">
+        <aside className="flex w-64 flex-col border-r border-neutral-900 bg-neutral-950/20 p-4 flex-shrink-0">
           <div className="flex items-center justify-between px-2 mb-4">
             <span className="text-xs font-bold uppercase tracking-wider text-neutral-500">
               Categories
@@ -89,7 +123,7 @@ export function AppShell({ user, initialCategories }: AppShellProps) {
                   onClick={() => setSelectedCategoryId(category.id)}
                   className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-medium transition ${
                     isSelected
-                      ? "bg-blue-600/10 text-blue-400"
+                      ? "bg-blue-600/10 text-blue-400 font-semibold"
                       : "text-neutral-400 hover:bg-neutral-900/60 hover:text-white"
                   }`}
                 >
@@ -145,27 +179,47 @@ export function AppShell({ user, initialCategories }: AppShellProps) {
                 <span>Create your first category</span>
               </button>
             </div>
-          ) : (
-            /* Selected Category Display placeholder */
-            <div className="flex flex-1 flex-col">
-              <div className="flex items-center justify-between border-b border-neutral-900 pb-4 mb-6">
-                <div className="flex items-center gap-3">
-                  <Folder className="h-6 w-6 text-blue-500" />
-                  <h1 className="text-2xl font-bold text-white tracking-tight">
-                    {selectedCategory?.name ?? "Select a category"}
-                  </h1>
-                </div>
-                <button className="flex items-center gap-1.5 rounded-lg bg-neutral-900 border border-neutral-800 hover:border-neutral-700 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-neutral-800 transition">
-                  <Plus className="h-3.5 w-3.5" />
-                  <span>New Entry</span>
-                </button>
-              </div>
+          ) : selectedCategoryId && selectedCategory ? (
+            /* Render active flow screen based on view state */
+            <>
+              {view === "LIST" && (
+                <EntryList
+                  categoryId={selectedCategoryId}
+                  categoryName={selectedCategory.name}
+                  onCreateEntry={() => {
+                    setActiveEntry(null);
+                    setView("EDITOR");
+                  }}
+                  onSelectEntry={(entry) => {
+                    setActiveEntry(entry);
+                    setView("DETAIL");
+                  }}
+                />
+              )}
 
-              <div className="flex flex-1 flex-col items-center justify-center border border-dashed border-neutral-900 rounded-xl bg-neutral-900/5 p-8 text-center">
-                <p className="text-sm text-neutral-500 italic">
-                  No entries inside &ldquo;{selectedCategory?.name}&rdquo; yet.
-                </p>
-              </div>
+              {view === "EDITOR" && (
+                <EntryEditor
+                  categoryId={selectedCategoryId}
+                  initialEntry={activeEntry ?? undefined}
+                  onSave={() => setView("LIST")}
+                  onCancel={() =>
+                    setView(activeEntry ? "DETAIL" : "LIST")
+                  }
+                />
+              )}
+
+              {view === "DETAIL" && activeEntry && (
+                <EntryDetail
+                  entry={activeEntry}
+                  onEdit={() => setView("EDITOR")}
+                  onDelete={() => setView("LIST")}
+                  onBack={() => setView("LIST")}
+                />
+              )}
+            </>
+          ) : (
+            <div className="flex flex-1 items-center justify-center text-neutral-500 italic text-sm">
+              Select a category to view entries.
             </div>
           )}
         </main>
