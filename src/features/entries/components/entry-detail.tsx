@@ -118,6 +118,112 @@ export function EntryDetail({
 
   return (
     <div className="flex flex-1 flex-col h-full overflow-hidden select-none">
+      {/* CSS stylesheet override to style the TipTap WYSIWYG read viewport */}
+      <style>{`
+        .prose-detail h1 {
+          font-size: 1.5rem;
+          font-weight: 700;
+          margin-top: 1rem;
+          margin-bottom: 0.5rem;
+          color: white;
+        }
+        .prose-detail h2 {
+          font-size: 1.25rem;
+          font-weight: 700;
+          margin-top: 1rem;
+          margin-bottom: 0.5rem;
+          color: white;
+        }
+        .prose-detail p {
+          margin-bottom: 0.8rem;
+        }
+        .prose-detail ul {
+          list-style-type: disc;
+          padding-left: 1.5rem;
+          margin-bottom: 0.8rem;
+        }
+        .prose-detail ol {
+          list-style-type: decimal;
+          padding-left: 1.5rem;
+          margin-bottom: 0.8rem;
+        }
+        .prose-detail blockquote {
+          border-left: 3px solid #2563eb;
+          padding-left: 1rem;
+          color: #a3a3a3;
+          font-style: italic;
+          margin-bottom: 0.8rem;
+        }
+        .prose-detail code {
+          background-color: rgba(255, 255, 255, 0.05);
+          padding: 0.2rem 0.4rem;
+          border-radius: 0.25rem;
+          font-family: monospace;
+          font-size: 0.85em;
+          color: #fb7185;
+        }
+        .prose-detail pre {
+          background-color: rgba(0, 0, 0, 0.3);
+          padding: 1rem;
+          border-radius: 0.5rem;
+          font-family: monospace;
+          overflow-x: auto;
+          margin-bottom: 0.8rem;
+        }
+        .prose-detail pre code {
+          background-color: transparent;
+          padding: 0;
+          border-radius: 0;
+          color: inherit;
+          font-size: inherit;
+        }
+        /* Tables styling */
+        .prose-detail table {
+          border-collapse: collapse;
+          table-layout: fixed;
+          width: 100%;
+          margin: 0;
+          overflow: hidden;
+          margin-bottom: 1rem;
+        }
+        .prose-detail table td, .prose-detail table th {
+          min-width: 1em;
+          border: 1px solid #262626;
+          padding: 6px 8px;
+          vertical-align: top;
+          box-sizing: border-box;
+          position: relative;
+        }
+        .prose-detail table th {
+          background-color: rgba(255, 255, 255, 0.05);
+          font-weight: bold;
+          text-align: left;
+        }
+        /* Checkbox lists styling */
+        .prose-detail ul[data-type="taskList"] {
+          list-style: none;
+          padding: 0;
+          margin-bottom: 0.8rem;
+        }
+        .prose-detail ul[data-type="taskList"] li {
+          display: flex;
+          align-items: flex-start;
+          gap: 0.5rem;
+          margin-bottom: 0.4rem;
+        }
+        .prose-detail ul[data-type="taskList"] li label {
+          display: flex;
+          align-items: center;
+          height: 1.25rem;
+          user-select: none;
+        }
+        .prose-detail ul[data-type="taskList"] li label input {
+          cursor: pointer;
+          accent-color: #2563eb;
+          margin: 0;
+        }
+      `}</style>
+
       {/* Header controls */}
       <div className="flex items-center justify-between border-b border-neutral-900 pb-4 mb-6">
         <button
@@ -202,7 +308,7 @@ export function EntryDetail({
             {htmlContent ? (
               <div
                 dangerouslySetInnerHTML={{ __html: htmlContent }}
-                className="space-y-4"
+                className="space-y-4 prose-detail"
               />
             ) : (
               <p className="text-neutral-600 text-sm italic">No content text.</p>

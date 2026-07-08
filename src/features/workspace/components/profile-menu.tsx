@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { LogOut, User as UserIcon, ChevronDown } from "lucide-react";
+import { LogOut, ChevronDown } from "lucide-react";
 
 interface ProfileMenuProps {
   user: {
@@ -51,39 +51,47 @@ export function ProfileMenu({ user }: ProfileMenuProps) {
   const userInitial = user.username.charAt(0).toUpperCase();
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className="relative w-full" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 rounded-lg border border-neutral-800 bg-neutral-900/50 p-1.5 pr-3 text-sm text-neutral-300 transition hover:border-neutral-700 hover:bg-neutral-900 hover:text-white focus:outline-none"
+        className="flex w-full items-center gap-2.5 rounded-xl border border-neutral-900 bg-neutral-900/10 p-2 text-left text-sm text-neutral-300 transition hover:bg-neutral-900 hover:text-white focus:outline-none"
       >
-        <div className="flex h-7 w-7 items-center justify-center rounded-md bg-blue-600 font-semibold text-white">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 font-semibold text-white flex-shrink-0 shadow-md shadow-blue-650/10">
           {userInitial}
         </div>
-        <span className="max-w-[100px] truncate font-medium">
-          {user.username}
-        </span>
-        <ChevronDown className="h-4 w-4 text-neutral-500 transition-transform duration-200" style={{ transform: isOpen ? 'rotate(180deg)' : 'none' }} />
+        <div className="flex flex-1 flex-col min-w-0">
+          <span className="truncate text-xs font-bold text-white leading-tight">
+            {user.username}
+          </span>
+          <span className="truncate text-[10px] text-neutral-500 leading-none mt-0.5">
+            {user.email}
+          </span>
+        </div>
+        <ChevronDown
+          className="h-4 w-4 text-neutral-500 transition-transform duration-200 flex-shrink-0 ml-auto"
+          style={{ transform: isOpen ? "rotate(180deg)" : "none" }}
+        />
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 origin-top-right rounded-xl border border-neutral-800 bg-neutral-900 p-2 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-          <div className="px-3 py-2.5">
-            <p className="text-xs text-neutral-500 font-medium uppercase tracking-wider">
-              Signed in as
+        <div className="absolute left-0 bottom-full mb-2 w-full origin-bottom-left rounded-xl border border-neutral-900 bg-neutral-950 p-1.5 shadow-2xl focus:outline-none z-50 animate-in fade-in slide-in-from-bottom-2 duration-150">
+          <div className="px-3.5 py-2.5">
+            <p className="text-[10px] text-neutral-550 font-bold uppercase tracking-wider">
+              Account Settings
             </p>
-            <p className="mt-1 truncate font-semibold text-sm text-white">
+            <p className="mt-1 truncate font-bold text-xs text-white">
               {user.username}
             </p>
-            <p className="truncate text-xs text-neutral-400 mt-0.5">
+            <p className="truncate text-[10px] text-neutral-500 mt-0.5">
               {user.email}
             </p>
           </div>
 
-          <div className="my-1 border-t border-neutral-800" />
+          <div className="my-1 border-t border-neutral-900" />
 
           <button
             onClick={handleLogout}
-            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-red-400 transition hover:bg-red-500/10 hover:text-red-300 focus:outline-none"
+            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-semibold text-red-450 transition hover:bg-red-500/5 hover:text-red-305 focus:outline-none"
           >
             <LogOut className="h-4 w-4" />
             <span>Log out</span>
