@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Folder, Plus, Search, FolderPlus, PanelLeft, Pin } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Folder, Plus, Search, FolderPlus, PanelLeft, Pin, MoreVertical, Edit2, Trash2 } from "lucide-react";
 
 import { ProfileMenu } from "./profile-menu";
 import { CreateCategoryModal } from "./create-category-modal";
@@ -56,6 +56,13 @@ export function AppShell({ user, initialCategories }: AppShellProps) {
   const [toast, setToast] = useState<{ message: string; type: "error" | "success" } | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
+  // Category options states
+  const [activeMenuCategoryId, setActiveMenuCategoryId] = useState<string | null>(null);
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState("");
+  const [deletingCategory, setDeletingCategory] = useState<Category | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+
   // Entry flow states
   const [view, setView] = useState<ActiveView>("LIST");
   const [activeEntry, setActiveEntry] = useState<Entry | null>(null);
@@ -76,6 +83,27 @@ export function AppShell({ user, initialCategories }: AppShellProps) {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Close dropdown categories options on click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target as Node)
+      ) {
+        setActiveMenuCategoryId(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener(
+        "mousedown",
+        handleClickOutside
+      );
+    };
   }, []);
 
   const handleCreateSuccess = (newCategory: { id: string; name: string }) => {
@@ -159,6 +187,200 @@ export function AppShell({ user, initialCategories }: AppShellProps) {
     }
   };
 
+  const handleRenameCategory = async (categoryId: string) => {
+    const name = editingName.trim();
+    if (!name) return;
+
+    try {
+      const res = await fetch(`/api/categories/${categoryId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+      });
+      const result = await res.json();
+
+      if (res.ok && result.success) {
+        setCategories((prev) =>
+          prev.map((c) => (c.id === categoryId ? { ...c, name } : c))
+        );
+        setEditingCategoryId(null);
+        setToast({
+          message: "Category renamed successfully.",
+          type: "success",
+        });
+        setTimeout(() => setToast(null), 3000);
+      } else {
+        setToast({
+          message: result.error?.message ?? "Failed to rename category.",
+          type: "error",
+        });
+        setTimeout(() => setToast(null), 3000);
+      }
+    } catch {
+      setToast({
+        message: "Network error renaming category.",
+        type: "error",
+      });
+      setTimeout(() => setToast(null), 3000);
+    }
+  };
+
+  const handleDeleteCategory = async () => {
+    if (!deletingCategory) return;
+
+    try {
+      const res = await fetch(`/api/categories/${deletingCategory.id}`, {
+        method: "DELETE",
+      });
+      const result = await res.json();
+
+      if (res.ok && result.success) {
+        const remaining = categories.filter((c) => c.id !== deletingCategory.id);
+        setCategories(remaining);
+
+        if (selectedCategoryId === deletingCategory.id) {
+          setSelectedCategoryId(remaining[0]?.id ?? null);
+        }
+
+        setDeletingCategory(null);
+        setToast({
+          message: "Category and all entries deleted successfully.",
+          type: "success",
+        });
+        setTimeout(() => setToast(null), 3000);
+      } else {
+        setToast({
+          message: result.error?.message ?? "Failed to delete category.",
+          type: "error",
+        });
+        setTimeout(() => setToast(null), 3000);
+      }
+    } catch {
+      setToast({
+        message: "Network error deleting category.",
+        type: "error",
+      });
+      setTimeout(() => setToast(null), 3000);
+    }
+  };
+
+  const renderCategoryItem = (category: Category) => {
+    const isSelected = category.id === selectedCategoryId;
+
+    if (editingCategoryId === category.id) {
+      return (
+        <form
+          key={category.id}
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleRenameCategory(category.id);
+          }}
+          className="flex items-center gap-1.5 w-full bg-neutral-900 border border-neutral-800 rounded-lg p-1.5 my-0.5 animate-in fade-in duration-100"
+        >
+          <input
+            type="text"
+            value={editingName}
+            onChange={(e) => setEditingName(e.target.value)}
+            className="flex-1 bg-transparent text-xs text-white outline-none border-none p-0.5 font-medium"
+            autoFocus
+            maxLength={50}
+          />
+          <button
+            type="submit"
+            className="text-green-500 hover:text-green-400 p-0.5 text-xs font-bold transition flex-shrink-0"
+            title="Save name"
+          >
+            ✓
+          </button>
+          <button
+            type="button"
+            onClick={() => setEditingCategoryId(null)}
+            className="text-red-500 hover:text-red-400 p-0.5 text-xs font-bold transition flex-shrink-0"
+            title="Cancel rename"
+          >
+            ✗
+          </button>
+        </form>
+      );
+    }
+
+    return (
+      <div
+        key={category.id}
+        className={`group relative flex items-center justify-between rounded-lg px-2.5 py-1.5 text-left text-sm font-medium transition hover:bg-neutral-900/40 ${isSelected ? "bg-blue-600/5" : ""
+          }`}
+      >
+        <button
+          onClick={() => setSelectedCategoryId(category.id)}
+          className={`flex flex-1 items-center gap-2.5 text-left transition min-w-0 ${isSelected ? "text-blue-400 font-semibold" : "text-neutral-400 hover:text-white"
+            }`}
+        >
+          <Folder className={`h-4 w-4 flex-shrink-0 ${isSelected ? "text-blue-400" : "text-neutral-500"}`} />
+          <span className="truncate">{category.name}</span>
+        </button>
+
+        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 focus-within:opacity-100 flex-shrink-0 ml-1.5 transition duration-150">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleTogglePin(category.id, !category.isPinned);
+            }}
+            className="p-1 text-neutral-500 hover:text-white transition rounded hover:bg-neutral-900/60"
+            title={category.isPinned ? "Unpin category" : "Pin category"}
+          >
+            <Pin className={`h-3.5 w-3.5 ${category.isPinned ? "fill-blue-500 text-blue-450" : "text-neutral-500"}`} />
+          </button>
+
+          <div
+            ref={activeMenuCategoryId === category.id ? menuRef : null}
+            className="relative"
+          >
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setActiveMenuCategoryId(activeMenuCategoryId === category.id ? null : category.id);
+              }}
+              className="p-1 text-neutral-500 hover:text-white transition rounded hover:bg-neutral-900/60"
+              title="Category options"
+            >
+              <MoreVertical className="h-3.5 w-3.5" />
+            </button>
+
+            {activeMenuCategoryId === category.id && (
+              <div className="absolute right-0 mt-1 w-24 origin-top-right rounded-lg border border-neutral-900 bg-neutral-950 p-1 shadow-xl z-50 animate-in fade-in duration-100">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setEditingCategoryId(category.id);
+                    setEditingName(category.name);
+                    setActiveMenuCategoryId(null);
+                  }}
+                  className="flex w-full items-center gap-1.5 rounded px-2 py-1 text-left text-xs text-neutral-300 hover:bg-neutral-900 hover:text-white transition font-medium"
+                >
+                  <Edit2 className="h-3 w-3 text-neutral-550" />
+                  <span>Rename</span>
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDeletingCategory(category);
+                    setActiveMenuCategoryId(null);
+                  }}
+                  className="flex w-full items-center gap-1.5 rounded px-2 py-1 text-left text-xs text-red-405 hover:bg-red-500/10 hover:text-red-300 transition font-medium"
+                >
+                  <Trash2 className="h-3 w-3 text-red-500" />
+                  <span>Delete</span>
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const selectedCategory = categories.find((c) => c.id === selectedCategoryId);
 
   return (
@@ -235,38 +457,7 @@ export function AppShell({ user, initialCategories }: AppShellProps) {
                   Pinned ({categories.filter(c => c.isPinned).length}/3)
                 </span>
                 <div className="space-y-0.5">
-                  {categories.filter(c => c.isPinned).map((category) => {
-                    const isSelected = category.id === selectedCategoryId;
-                    return (
-                      <div
-                        key={category.id}
-                        className={`group flex items-center justify-between rounded-lg px-2.5 py-1.5 text-left text-sm font-medium transition hover:bg-neutral-900/40 ${
-                          isSelected ? "bg-blue-600/5" : ""
-                        }`}
-                      >
-                        <button
-                          onClick={() => setSelectedCategoryId(category.id)}
-                          className={`flex flex-1 items-center gap-2.5 text-left transition min-w-0 ${
-                            isSelected ? "text-blue-400 font-semibold" : "text-neutral-400 hover:text-white"
-                          }`}
-                        >
-                          <Folder className={`h-4 w-4 flex-shrink-0 ${isSelected ? "text-blue-400" : "text-neutral-500"}`} />
-                          <span className="truncate">{category.name}</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleTogglePin(category.id, false);
-                          }}
-                          className="p-1 text-blue-400 hover:text-red-450 transition rounded hover:bg-neutral-900/60 flex-shrink-0"
-                          title="Unpin category"
-                        >
-                          <Pin className="h-3.5 w-3.5 fill-blue-500 text-blue-400" />
-                        </button>
-                      </div>
-                    );
-                  })}
+                  {categories.filter(c => c.isPinned).map((category) => renderCategoryItem(category))}
                 </div>
               </div>
             )}
@@ -278,38 +469,7 @@ export function AppShell({ user, initialCategories }: AppShellProps) {
                   Folders
                 </span>
               )}
-              {categories.filter(c => !c.isPinned).map((category) => {
-                const isSelected = category.id === selectedCategoryId;
-                return (
-                  <div
-                    key={category.id}
-                    className={`group flex items-center justify-between rounded-lg px-2.5 py-1.5 text-left text-sm font-medium transition hover:bg-neutral-900/40 ${
-                      isSelected ? "bg-blue-600/5" : ""
-                    }`}
-                  >
-                    <button
-                      onClick={() => setSelectedCategoryId(category.id)}
-                      className={`flex flex-1 items-center gap-2.5 text-left transition min-w-0 ${
-                        isSelected ? "text-blue-400 font-semibold" : "text-neutral-400 hover:text-white"
-                      }`}
-                    >
-                      <Folder className={`h-4 w-4 flex-shrink-0 ${isSelected ? "text-blue-400" : "text-neutral-500"}`} />
-                      <span className="truncate">{category.name}</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleTogglePin(category.id, true);
-                      }}
-                      className="opacity-0 group-hover:opacity-100 focus:opacity-100 p-1 text-neutral-500 hover:text-white transition rounded hover:bg-neutral-900/60 flex-shrink-0"
-                      title="Pin category"
-                    >
-                      <Pin className="h-3.5 w-3.5 text-neutral-500" />
-                    </button>
-                  </div>
-                );
-              })}
+              {categories.filter(c => !c.isPinned).map((category) => renderCategoryItem(category))}
 
               {categories.length === 0 && (
                 <p className="px-3 py-4 text-xs text-neutral-600 italic">
@@ -408,10 +568,42 @@ export function AppShell({ user, initialCategories }: AppShellProps) {
         onSelectResult={handleSelectSearchResult}
       />
 
+      {/* Cascading Sweeping Delete Confirmation Modal */}
+      {deletingCategory && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="w-full max-w-sm transform overflow-hidden rounded-xl border border-neutral-900 bg-neutral-950 p-6 shadow-2xl transition-all animate-in scale-in duration-200">
+            <h3 className="text-md font-bold text-white leading-none">Delete Category?</h3>
+            <p className="mt-3 text-xs text-neutral-450 leading-relaxed">
+              Are you sure you want to delete the category <span className="font-semibold text-white">&ldquo;{deletingCategory.name}&rdquo;</span>?
+            </p>
+            <div className="mt-4 rounded-lg border border-red-950/30 bg-red-950/20 p-3 text-[11px] text-red-400 leading-normal flex items-start gap-2 font-medium">
+              <span className="mt-0.5">⚠️</span>
+              <span>This will permanently delete all entries in this category and sweep all attached files stored in AWS S3 storage. This action cannot be undone.</span>
+            </div>
+            <div className="mt-6 flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setDeletingCategory(null)}
+                className="rounded-lg border border-neutral-900 bg-neutral-900/30 px-3.5 py-2 text-xs font-bold text-neutral-400 hover:bg-neutral-900 hover:text-white transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteCategory}
+                className="rounded-lg bg-red-650 px-3.5 py-2 text-xs font-bold text-white hover:bg-red-700 transition shadow-lg shadow-red-650/10"
+              >
+                Delete Category
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Floating Error Toast */}
       {toast && (
         <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl border border-red-900/50 bg-red-950/85 px-4.5 py-3 text-xs font-bold text-red-200 shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-bottom-5 duration-300">
-          <span>⚠️</span>
+          <span>{toast.type === "success" ? "✅" : "⚠️"}</span>
           <span>{toast.message}</span>
         </div>
       )}
