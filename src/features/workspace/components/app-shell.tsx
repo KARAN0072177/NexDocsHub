@@ -8,6 +8,7 @@ import { CreateCategoryModal } from "./create-category-modal";
 import { EntryList } from "@/features/entries/components/entry-list";
 import { EntryEditor } from "@/features/entries/components/entry-editor";
 import { EntryDetail } from "@/features/entries/components/entry-detail";
+import { SearchModal } from "./search-modal";
 
 interface Category {
   id: string;
@@ -53,6 +54,7 @@ export function AppShell({ user, initialCategories }: AppShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [pinError, setPinError] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; type: "error" | "success" } | null>(null);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   // Entry flow states
   const [view, setView] = useState<ActiveView>("LIST");
@@ -63,6 +65,18 @@ export function AppShell({ user, initialCategories }: AppShellProps) {
     setView("LIST");
     setActiveEntry(null);
   }, [selectedCategoryId]);
+
+  // Listen for Ctrl+K / Cmd+K global shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+        e.preventDefault();
+        setIsSearchOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const handleCreateSuccess = (newCategory: { id: string; name: string }) => {
     const fullCategory: Category = {
@@ -117,6 +131,34 @@ export function AppShell({ user, initialCategories }: AppShellProps) {
     }
   };
 
+  const handleSelectSearchResult = async (result: any) => {
+    setIsSearchOpen(false);
+    try {
+      const res = await fetch(`/api/entries/${result.id}`);
+      const json = await res.json();
+
+      if (res.ok && json.success) {
+        // Set view category
+        setSelectedCategoryId(result.categoryId);
+        // Load details screen
+        setActiveEntry(json.data);
+        setView("DETAIL");
+      } else {
+        setToast({
+          message: "Failed to load document details.",
+          type: "error",
+        });
+        setTimeout(() => setToast(null), 3000);
+      }
+    } catch {
+      setToast({
+        message: "Network error loading document.",
+        type: "error",
+      });
+      setTimeout(() => setToast(null), 3000);
+    }
+  };
+
   const selectedCategory = categories.find((c) => c.id === selectedCategoryId);
 
   return (
@@ -143,15 +185,18 @@ export function AppShell({ user, initialCategories }: AppShellProps) {
           </div>
         </div>
 
-        {/* Search */}
-        <div className="relative w-full max-w-md">
-          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
-          <input
-            type="text"
-            placeholder="Search entries, tags..."
-            disabled
-            className="w-full rounded-lg border border-neutral-900 bg-neutral-900/30 py-2 pl-10 pr-4 text-sm text-neutral-400 outline-none placeholder:text-neutral-600 focus:border-neutral-800 transition"
-          />
+        {/* Search trigger wrapper display */}
+        <div
+          onClick={() => setIsSearchOpen(true)}
+          className="relative w-full max-w-md cursor-pointer group"
+        >
+          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500 group-hover:text-neutral-300 transition" />
+          <div className="w-full rounded-lg border border-neutral-900 bg-neutral-900/30 py-2.5 pl-10 pr-16 text-xs text-neutral-500 group-hover:text-neutral-300 outline-none transition group-hover:border-neutral-800 flex items-center justify-between select-none">
+            <span>Search knowledge base...</span>
+            <kbd className="border border-neutral-850 bg-neutral-900/60 rounded px-1.5 py-0.5 text-[9px] font-sans flex items-center gap-0.5 select-none">
+              <span>Ctrl</span><span>K</span>
+            </kbd>
+          </div>
         </div>
 
         {/* Top-Right placeholder to keep centering balanced */}
@@ -354,6 +399,13 @@ export function AppShell({ user, initialCategories }: AppShellProps) {
         isOpen={isModalOpen}
         onClose={() => setIsOpenModal(false)}
         onSuccess={handleCreateSuccess}
+      />
+
+      {/* Global Cmd+K Search Modal Overlay */}
+      <SearchModal
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+        onSelectResult={handleSelectSearchResult}
       />
 
       {/* Floating Error Toast */}

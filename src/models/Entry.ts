@@ -76,6 +76,24 @@ EntrySchema.index({ categoryId: 1 });
 EntrySchema.index({ workspaceId: 1 });
 EntrySchema.index({ type: 1 });
 
+EntrySchema.index(
+  {
+    title: "text",
+    tags: "text",
+    content: "text",
+    "attachments.name": "text",
+  },
+  {
+    weights: {
+      title: 10,
+      tags: 5,
+      content: 2,
+      "attachments.name": 1,
+    },
+    name: "EntryTextIndex",
+  }
+);
+
 export type EntryDocument = InferSchemaType<typeof EntrySchema> & {
   _id: Types.ObjectId;
 };
