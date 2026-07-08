@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X } from "lucide-react";
+import { X, FolderPlus, Loader2 } from "lucide-react";
 
 interface CreateCategoryModalProps {
   isOpen: boolean;
@@ -48,7 +48,6 @@ export function CreateCategoryModal({
         return;
       }
 
-      // Success
       setName("");
       onSuccess({
         id: result.data._id || result.data.id,
@@ -63,23 +62,33 @@ export function CreateCategoryModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="w-full max-w-md transform overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900 p-6 shadow-2xl transition-all animate-in scale-in duration-200">
-        <div className="flex items-center justify-between border-b border-neutral-800 pb-4">
-          <h3 className="text-lg font-bold text-white">Create New Category</h3>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="w-full max-w-md transform overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0e1017]/90 backdrop-blur-xl p-6 shadow-2xl shadow-black/50 transition-all animate-in scale-in duration-200">
+        {/* Header */}
+        <div className="flex items-start justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500/10 border border-blue-500/20">
+              <FolderPlus className="h-4.5 w-4.5 text-blue-400" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-white">New Category</h3>
+              <p className="text-[11px] text-neutral-500 mt-0.5">Organize your knowledge base</p>
+            </div>
+          </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1 text-neutral-400 hover:bg-neutral-800 hover:text-white transition"
+            className="rounded-lg p-1.5 text-neutral-600 hover:bg-white/[0.06] hover:text-white transition"
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 w-4" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label
               htmlFor="categoryName"
-              className="mb-2 block text-sm font-medium text-neutral-200"
+              className="mb-2 block text-xs font-semibold text-neutral-400 uppercase tracking-wider"
             >
               Category Name
             </label>
@@ -95,26 +104,37 @@ export function CreateCategoryModal({
               disabled={isSubmitting}
               maxLength={50}
               autoFocus
-              className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-2.5 text-white outline-none transition focus:border-blue-500 text-sm"
+              className="w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition focus:border-blue-500/50 focus:bg-white/[0.06] placeholder:text-neutral-700"
             />
-            {error && <p className="mt-1.5 text-xs text-red-500">{error}</p>}
+            {error && (
+              <p className="mt-2 text-xs text-red-400 flex items-center gap-1.5">
+                <span className="font-semibold">{error}</span>
+              </p>
+            )}
           </div>
 
-          <div className="flex items-center justify-end gap-3 border-t border-neutral-800 pt-4 mt-6">
+          <div className="flex items-center justify-end gap-3 pt-2">
             <button
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="rounded-lg border border-neutral-700 px-4 py-2 text-sm font-semibold text-neutral-300 transition hover:bg-neutral-800 hover:text-white disabled:opacity-50"
+              className="rounded-xl border border-white/[0.08] px-4 py-2.5 text-xs font-semibold text-neutral-400 transition hover:bg-white/[0.06] hover:text-white disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
+              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 px-5 py-2.5 text-xs font-bold text-white transition-all shadow-lg shadow-blue-600/20 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? "Creating..." : "Create Category"}
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  <span>Creating...</span>
+                </>
+              ) : (
+                <span>Create Category</span>
+              )}
             </button>
           </div>
         </form>

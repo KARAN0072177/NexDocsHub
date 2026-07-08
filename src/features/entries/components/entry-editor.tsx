@@ -300,10 +300,10 @@ export function EntryEditor({
       type="button"
       onClick={onClick}
       title={title}
-      className={`rounded p-1.5 transition text-xs font-semibold focus:outline-none ${
+      className={`rounded-lg p-1.5 transition text-xs font-semibold focus:outline-none border ${
         isActive
-          ? "bg-blue-600/20 text-blue-450 border border-blue-500/20"
-          : "text-neutral-400 hover:bg-neutral-800 hover:text-white border border-transparent"
+          ? "bg-blue-500/15 text-blue-400 border-blue-500/25 shadow-sm shadow-blue-500/10"
+          : "text-neutral-500 hover:bg-white/[0.05] hover:text-white border-transparent"
       }`}
     >
       {children}
@@ -422,20 +422,20 @@ export function EntryEditor({
       `}</style>
 
       {/* Editor Header */}
-      <div className="flex items-center justify-between border-b border-neutral-900 pb-4 mb-4">
+      <div className="flex items-center justify-between border-b border-white/[0.06] pb-5 mb-6">
         <div className="flex items-center gap-4">
-          <h1 className="text-xl font-bold text-white tracking-tight">
+          <h1 className="text-lg font-bold text-white tracking-tight">
             {initialEntry ? `Edit: ${initialEntry.title}` : "New Entry"}
           </h1>
           {format === "note" && (
-            <div className="flex rounded-lg bg-neutral-900/50 p-1 border border-neutral-850">
+            <div className="flex rounded-xl bg-white/[0.02] p-1 border border-white/[0.06]">
               <button
                 type="button"
                 onClick={() => setIsPreview(false)}
-                className={`rounded-md px-3 py-1 text-xs font-semibold transition ${
+                className={`rounded-lg px-3 py-1 text-xs font-semibold transition ${
                   !isPreview
-                    ? "bg-blue-600 text-white"
-                    : "text-neutral-400 hover:text-white"
+                    ? "bg-white/[0.08] text-white border border-white/[0.08] shadow-sm"
+                    : "text-neutral-500 hover:text-neutral-300 border border-transparent"
                 }`}
               >
                 Write
@@ -443,10 +443,10 @@ export function EntryEditor({
               <button
                 type="button"
                 onClick={() => setIsPreview(true)}
-                className={`rounded-md px-3 py-1 text-xs font-semibold transition ${
+                className={`rounded-lg px-3 py-1 text-xs font-semibold transition ${
                   isPreview
-                    ? "bg-blue-600 text-white"
-                    : "text-neutral-400 hover:text-white"
+                    ? "bg-white/[0.08] text-white border border-white/[0.08] shadow-sm"
+                    : "text-neutral-500 hover:text-neutral-300 border border-transparent"
                 }`}
               >
                 Preview
@@ -454,21 +454,21 @@ export function EntryEditor({
             </div>
           )}
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={onCancel}
             disabled={isSubmitting}
-            className="rounded-lg border border-neutral-800 bg-neutral-900/40 px-4 py-2 text-sm font-semibold text-neutral-300 transition hover:bg-neutral-800 hover:text-white disabled:opacity-50"
+            className="rounded-xl border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.06] hover:border-white/[0.12] px-4 py-2 text-xs font-semibold text-neutral-300 hover:text-white transition disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={isSubmitting}
-            className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50 shadow-lg shadow-blue-600/15"
+            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 px-5 py-2.5 text-xs font-bold text-white transition-all shadow-lg shadow-blue-600/20 disabled:opacity-50"
           >
-            {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
+            {isSubmitting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
             <span>Save Entry</span>
           </button>
         </div>
@@ -521,10 +521,10 @@ export function EntryEditor({
           </div>
         ) : (
           /* Editor Input Layout Form */
-          <form className={`flex flex-col overflow-y-auto space-y-4 pr-1 ${format === "files" ? "w-full max-w-2xl mx-auto" : "flex-1"} pb-10`}>
+          <form className={`flex flex-col overflow-y-auto space-y-5 pr-1 ${format === "files" ? "w-full max-w-2xl mx-auto" : "flex-1"} pb-10`}>
             {/* Title input */}
             <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-neutral-400">
+              <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-neutral-500">
                 Title
               </label>
               <input
@@ -533,23 +533,23 @@ export function EntryEditor({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 disabled={isSubmitting}
-                className="w-full rounded-lg border border-neutral-900 bg-neutral-900/10 px-4 py-2.5 text-white outline-none transition focus:border-neutral-800 text-sm font-semibold"
+                className="w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition focus:border-blue-500/50 focus:bg-white/[0.06] placeholder:text-neutral-700 font-semibold"
               />
             </div>
 
             {/* Format Toggle Button Group */}
             <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-neutral-400">
+              <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-neutral-500">
                 Format
               </label>
-              <div className="flex gap-2">
+              <div className="flex gap-2.5">
                 <button
                   type="button"
                   onClick={() => setFormat("note")}
-                  className={`flex-1 rounded-lg border py-2 px-3 text-xs font-bold transition focus:outline-none ${
+                  className={`flex-1 rounded-xl border py-2.5 px-3 text-xs font-bold transition focus:outline-none ${
                     format === "note"
-                      ? "bg-blue-600/10 border-blue-500/50 text-blue-400"
-                      : "bg-neutral-900/40 border-neutral-900 text-neutral-500 hover:text-neutral-300"
+                      ? "bg-blue-500/10 border-blue-500/25 text-blue-400 shadow-sm shadow-blue-500/5"
+                      : "bg-white/[0.02] border-white/[0.06] text-neutral-550 hover:text-neutral-350 hover:bg-white/[0.04]"
                   }`}
                 >
                   Rich Text Document
@@ -557,10 +557,10 @@ export function EntryEditor({
                 <button
                   type="button"
                   onClick={() => setFormat("files")}
-                  className={`flex-1 rounded-lg border py-2 px-3 text-xs font-bold transition focus:outline-none ${
+                  className={`flex-1 rounded-xl border py-2.5 px-3 text-xs font-bold transition focus:outline-none ${
                     format === "files"
-                      ? "bg-blue-600/10 border-blue-500/50 text-blue-400"
-                      : "bg-neutral-900/40 border-neutral-900 text-neutral-500 hover:text-neutral-300"
+                      ? "bg-blue-500/10 border-blue-500/25 text-blue-400 shadow-sm shadow-blue-500/5"
+                      : "bg-white/[0.02] border-white/[0.06] text-neutral-550 hover:text-neutral-350 hover:bg-white/[0.04]"
                   }`}
                 >
                   Document Vault (Uploads Only)
@@ -571,26 +571,28 @@ export function EntryEditor({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Type dropdown */}
               <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-neutral-400">
+                <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-neutral-500">
                   Entry Type
                 </label>
-                <select
-                  value={type}
-                  onChange={(e) => setType(e.target.value)}
-                  disabled={isSubmitting}
-                  className="w-full rounded-lg border border-neutral-900 bg-neutral-900/10 px-4 py-2.5 text-neutral-200 outline-none transition focus:border-neutral-800 text-sm font-semibold"
-                >
-                  {Object.entries(typeConfig).map(([key, config]) => (
-                    <option key={key} value={key} className="bg-neutral-900">
-                      {config.label}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <select
+                    value={type}
+                    onChange={(e) => setType(e.target.value)}
+                    disabled={isSubmitting}
+                    className="w-full rounded-xl border border-white/[0.08] bg-[#0c0e14] px-4 py-3 text-neutral-300 outline-none transition focus:border-blue-500/50 focus:bg-[#0c0e14]/80 text-sm font-semibold appearance-none cursor-pointer"
+                  >
+                    {Object.entries(typeConfig).map(([key, config]) => (
+                      <option key={key} value={key} className="bg-[#0c0e14] text-neutral-300">
+                        {config.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               {/* Tags input */}
               <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-neutral-400">
+                <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-neutral-500">
                   Tags (comma separated)
                 </label>
                 <input
@@ -599,14 +601,14 @@ export function EntryEditor({
                   value={tagsInput}
                   onChange={(e) => setTagsInput(e.target.value)}
                   disabled={isSubmitting}
-                  className="w-full rounded-lg border border-neutral-900 bg-neutral-900/10 px-4 py-2.5 text-white outline-none transition focus:border-neutral-800 text-sm"
+                  className="w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition focus:border-blue-500/50 focus:bg-white/[0.06] placeholder:text-neutral-700"
                 />
               </div>
             </div>
 
             {type === "custom" && (
               <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-neutral-400">
+                <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-neutral-500">
                   Custom Type Name
                 </label>
                 <input
@@ -615,17 +617,17 @@ export function EntryEditor({
                   value={customType}
                   onChange={(e) => setCustomType(e.target.value)}
                   disabled={isSubmitting}
-                  className="w-full rounded-lg border border-neutral-900 bg-neutral-900/10 px-4 py-2.5 text-white outline-none transition focus:border-neutral-800 text-sm font-semibold"
+                  className="w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition focus:border-blue-500/50 focus:bg-white/[0.06] placeholder:text-neutral-700 font-semibold"
                 />
               </div>
             )}
 
             {/* S3 Attachment uploader zone */}
             <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-neutral-400">
+              <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-neutral-500">
                 Attachments (S3 Cloud Storage)
               </label>
-              <div className="relative flex flex-col items-center justify-center rounded-xl border border-dashed border-neutral-900 bg-neutral-900/5 p-6 text-center hover:bg-neutral-900/10 transition cursor-pointer">
+              <div className="relative flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/[0.08] bg-white/[0.01] p-6 text-center hover:bg-white/[0.03] hover:border-white/[0.12] transition cursor-pointer">
                 <input
                   type="file"
                   multiple
@@ -636,17 +638,17 @@ export function EntryEditor({
                 {uploading ? (
                   <div className="flex flex-col items-center gap-2">
                     <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
-                    <p className="text-sm font-medium text-neutral-400">
+                    <p className="text-xs font-semibold text-neutral-450">
                       Uploading directly to AWS S3...
                     </p>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center gap-2">
-                    <UploadCloud className="h-7 w-7 text-neutral-500" />
-                    <p className="text-sm font-medium text-neutral-300">
+                    <UploadCloud className="h-7 w-7 text-neutral-600" />
+                    <p className="text-xs font-bold text-neutral-350">
                       Drag files here or click to upload
                     </p>
-                    <p className="text-xs text-neutral-500">
+                    <p className="text-[10px] text-neutral-600 font-medium">
                       Supports Images, PDFs, docx, pptx, etc.
                     </p>
                   </div>
@@ -654,31 +656,31 @@ export function EntryEditor({
               </div>
 
               {uploadError && (
-                <p className="mt-1 text-xs text-red-500">{uploadError}</p>
+                <p className="mt-1.5 text-xs text-red-400 font-semibold">{uploadError}</p>
               )}
 
               {attachments.length > 0 && (
-                <div className="mt-3 space-y-1.5">
+                <div className="mt-3.5 space-y-2">
                   {attachments.map((file, index) => (
                     <div
                       key={index}
-                      className="flex items-center justify-between rounded-lg border border-neutral-900 bg-neutral-900/20 px-3.5 py-2 text-xs text-neutral-300"
+                      className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-2.5 text-xs text-neutral-300 hover:bg-white/[0.04] transition"
                     >
-                      <div className="flex items-center gap-2 min-w-0">
+                      <div className="flex items-center gap-2.5 min-w-0">
                         {file.mimeType.startsWith("image/") ? (
                           <ImageIcon className="h-4 w-4 text-blue-400 flex-shrink-0" />
                         ) : (
                           <File className="h-4 w-4 text-neutral-500 flex-shrink-0" />
                         )}
-                        <span className="truncate font-semibold">{file.name}</span>
-                        <span className="text-neutral-500 flex-shrink-0">
+                        <span className="truncate font-semibold text-neutral-200">{file.name}</span>
+                        <span className="text-neutral-600 font-medium flex-shrink-0">
                           ({formatFileSize(file.size)})
                         </span>
                       </div>
                       <button
                         type="button"
                         onClick={() => handleRemoveAttachment(index)}
-                        className="text-neutral-500 hover:text-red-400 transition"
+                        className="text-neutral-600 hover:text-red-400 transition"
                         title="Remove attachment"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -692,12 +694,12 @@ export function EntryEditor({
             {/* TipTap Rich Text Editor block */}
             {format === "note" && editor && (
               <div className="flex flex-col min-h-[400px]">
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-neutral-400">
+                <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-neutral-500">
                   Content (Rich Text Editor)
                 </label>
 
                 {/* Formatting Toolbar */}
-                <div className="flex flex-wrap items-center gap-1 border border-neutral-900 border-b-0 bg-neutral-900/20 px-3 py-2 rounded-t-lg">
+                <div className="flex flex-wrap items-center gap-1.5 border border-white/[0.08] border-b-0 bg-white/[0.03] px-3 py-2.5 rounded-t-2xl">
                   <ToolbarButton
                     onClick={() => editor.chain().focus().toggleBold().run()}
                     isActive={editor.isActive("bold")}
@@ -727,7 +729,7 @@ export function EntryEditor({
                     <Code className="h-4 w-4" />
                   </ToolbarButton>
 
-                  <div className="h-5 w-[1px] bg-neutral-900 mx-1.5" />
+                  <div className="h-5 w-[1px] bg-white/[0.08] mx-1" />
 
                   <ToolbarButton
                     onClick={() =>
@@ -748,7 +750,7 @@ export function EntryEditor({
                     <Heading2 className="h-4 w-4" />
                   </ToolbarButton>
 
-                  <div className="h-5 w-[1px] bg-neutral-900 mx-1.5" />
+                  <div className="h-5 w-[1px] bg-white/[0.08] mx-1" />
 
                   <ToolbarButton
                     onClick={() =>
@@ -778,7 +780,7 @@ export function EntryEditor({
                     <Quote className="h-4 w-4" />
                   </ToolbarButton>
 
-                  <div className="h-5 w-[1px] bg-neutral-900 mx-1.5" />
+                  <div className="h-5 w-[1px] bg-white/[0.08] mx-1" />
 
                   <ToolbarButton
                     onClick={() => editor.chain().focus().undo().run()}
@@ -797,7 +799,7 @@ export function EntryEditor({
                 {/* Editor content viewport */}
                 <EditorContent
                   editor={editor}
-                  className="w-full flex-1 rounded-b-lg border border-neutral-900 bg-neutral-900/10 p-4 text-white outline-none focus-within:border-neutral-800 text-sm overflow-y-auto min-h-[350px]"
+                  className="w-full flex-1 rounded-b-2xl border border-white/[0.08] bg-white/[0.01] p-4 text-white outline-none focus-within:border-white/[0.12] text-sm overflow-y-auto min-h-[350px]"
                 />
               </div>
             )}

@@ -225,26 +225,26 @@ export function EntryDetail({
       `}</style>
 
       {/* Header controls */}
-      <div className="flex items-center justify-between border-b border-neutral-900 pb-4 mb-6">
+      <div className="flex items-center justify-between border-b border-white/[0.06] pb-5 mb-7">
         <button
           onClick={onBack}
-          className="flex items-center gap-2 rounded-lg border border-neutral-900 bg-neutral-950 px-3 py-1.5 text-xs font-semibold text-neutral-400 hover:border-neutral-800 hover:text-white transition"
+          className="flex items-center gap-2 rounded-xl border border-white/[0.07] bg-white/[0.03] px-3.5 py-2 text-xs font-semibold text-neutral-500 hover:bg-white/[0.06] hover:border-white/[0.12] hover:text-white transition"
         >
-          <ArrowLeft className="h-4 w-4" />
-          <span>Back to entries</span>
+          <ArrowLeft className="h-3.5 w-3.5" />
+          <span>Back</span>
         </button>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <button
             onClick={onEdit}
-            className="flex items-center gap-1.5 rounded-lg border border-neutral-800 bg-neutral-900/50 hover:bg-neutral-800 px-4 py-2 text-xs font-semibold text-neutral-300 hover:text-white transition"
+            className="flex items-center gap-1.5 rounded-xl border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.07] hover:border-white/[0.12] px-4 py-2 text-xs font-semibold text-neutral-300 hover:text-white transition"
           >
             <Edit className="h-3.5 w-3.5" />
             <span>Edit</span>
           </button>
           <button
             onClick={() => setShowDeleteConfirm(true)}
-            className="flex items-center gap-1.5 rounded-lg border border-red-950 bg-red-950/20 hover:bg-red-950/40 px-4 py-2 text-xs font-semibold text-red-400 hover:text-red-300 transition"
+            className="flex items-center gap-1.5 rounded-xl border border-red-900/30 bg-red-950/20 hover:bg-red-900/30 hover:border-red-800/40 px-4 py-2 text-xs font-semibold text-red-400 hover:text-red-300 transition"
           >
             <Trash2 className="h-3.5 w-3.5" />
             <span>Delete</span>
@@ -290,7 +290,7 @@ export function EntryDetail({
               {entry.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="flex items-center gap-1 rounded bg-neutral-900 border border-neutral-900/60 px-2.5 py-1 text-xs text-neutral-400 font-medium"
+                  className="flex items-center gap-1 rounded bg-white/[0.04] border border-white/[0.06] px-2.5 py-1 text-xs text-neutral-400 font-medium"
                 >
                   <Tag className="h-3 w-3 text-neutral-500" />
                   <span>{tag}</span>
@@ -300,7 +300,7 @@ export function EntryDetail({
           )}
         </div>
 
-        <div className="border-t border-neutral-900" />
+        <div className="border-t border-white/[0.06]" />
 
         {/* Content body */}
         {entry.format !== "files" && (
@@ -317,15 +317,15 @@ export function EntryDetail({
         )}
 
         {entry.format === "files" && entry.attachments.length === 0 && (
-          <div className="flex flex-col items-center justify-center p-8 text-center border border-dashed border-neutral-900 rounded-xl bg-neutral-900/5">
+          <div className="flex flex-col items-center justify-center p-8 text-center border border-dashed border-white/[0.08] rounded-xl bg-white/[0.01]">
             <p className="text-sm text-neutral-500 italic">This vault contains no document files yet. Click &ldquo;Edit&rdquo; to add some.</p>
           </div>
         )}
 
         {/* Attachments Section */}
         {entry.attachments.length > 0 && (
-          <div className="border-t border-neutral-900 pt-6 mt-8 space-y-4">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-neutral-400 flex items-center gap-2">
+          <div className="border-t border-white/[0.06] pt-6 mt-8 space-y-4">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-neutral-450 flex items-center gap-2">
               <Paperclip className="h-4 w-4 text-neutral-500" />
               <span>Attachments ({entry.attachments.length})</span>
             </h3>
@@ -336,11 +336,11 @@ export function EntryDetail({
                 return (
                   <div
                     key={index}
-                    className="flex flex-col rounded-xl border border-neutral-900 bg-neutral-900/10 hover:border-neutral-800 transition overflow-hidden"
+                    className="flex flex-col rounded-xl border border-white/[0.06] bg-white/[0.02] hover:border-white/[0.12] transition overflow-hidden"
                   >
                     {/* Direct Image Preview */}
                     {isImage && (
-                      <div className="relative aspect-video w-full border-b border-neutral-900 bg-neutral-950 flex items-center justify-center overflow-hidden group">
+                      <div className="relative aspect-video w-full border-b border-white/[0.06] bg-black/40 flex items-center justify-center overflow-hidden group">
                         <img
                           src={file.url}
                           alt={file.name}
@@ -350,7 +350,7 @@ export function EntryDetail({
                           href={file.url}
                           target="_blank"
                           rel="noreferrer"
-                          className="absolute bottom-2 right-2 rounded-lg bg-neutral-950/80 p-1.5 text-neutral-400 hover:text-white transition"
+                          className="absolute bottom-2 right-2 rounded-lg bg-black/60 p-1.5 text-neutral-400 hover:text-white transition"
                           title="Open image in new tab"
                         >
                           <ExternalLink className="h-4 w-4" />
@@ -373,7 +373,7 @@ export function EntryDetail({
                         download={file.name}
                         target="_blank"
                         rel="noreferrer"
-                        className="rounded-lg border border-neutral-800 bg-neutral-950 p-2 text-neutral-400 hover:border-neutral-700 hover:text-white transition flex-shrink-0"
+                        className="rounded-lg border border-white/[0.08] bg-white/[0.03] p-2 text-neutral-400 hover:border-white/[0.12] hover:text-white transition flex-shrink-0"
                         title="Download Attachment"
                       >
                         <Download className="h-4 w-4" />
@@ -387,32 +387,37 @@ export function EntryDetail({
         )}
       </div>
 
-      {/* Delete Confirmation Modal Overlay */}
+      {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="w-full max-w-md transform overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900 p-6 shadow-2xl transition-all animate-in scale-in duration-200">
-            <h3 className="text-lg font-bold text-white">Delete Entry</h3>
-            <p className="mt-2 text-sm text-neutral-400 leading-relaxed">
-              Are you sure you want to delete &ldquo;{entry.title}&rdquo;? This
-              will permanently remove the entry and all its S3 attachments. This
-              action cannot be undone.
-            </p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="w-full max-w-md transform overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0e1017]/90 backdrop-blur-xl p-6 shadow-2xl shadow-black/50 transition-all animate-in scale-in duration-200">
+            <div className="flex items-start gap-3 mb-4">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-500/10 border border-red-500/20 flex-shrink-0">
+                <Trash2 className="h-4 w-4 text-red-400" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-white leading-none">Delete Entry?</h3>
+                <p className="mt-1.5 text-xs text-neutral-400 leading-relaxed">
+                  Permanently delete &ldquo;{entry.title}&rdquo;? All S3 attachments will also be removed. This cannot be undone.
+                </p>
+              </div>
+            </div>
 
-            <div className="flex items-center justify-end gap-3 border-t border-neutral-800 pt-4 mt-6">
+            <div className="flex items-center justify-end gap-2.5 mt-5">
               <button
                 type="button"
                 onClick={() => setShowDeleteConfirm(false)}
                 disabled={isDeleting}
-                className="rounded-lg border border-neutral-700 px-4 py-2 text-sm font-semibold text-neutral-300 transition hover:bg-neutral-800 hover:text-white disabled:opacity-50"
+                className="rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-2 text-xs font-semibold text-neutral-400 hover:bg-white/[0.07] hover:text-white transition disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDelete}
                 disabled={isDeleting}
-                className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-50 shadow-lg shadow-red-600/15"
+                className="flex items-center gap-2 rounded-xl bg-red-600 hover:bg-red-500 px-4 py-2 text-xs font-bold text-white transition shadow-lg shadow-red-600/20 disabled:opacity-50"
               >
-                {isDeleting && <Loader2 className="h-4 w-4 animate-spin" />}
+                {isDeleting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                 <span>Delete Entry</span>
               </button>
             </div>
