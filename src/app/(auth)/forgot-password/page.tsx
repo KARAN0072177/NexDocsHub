@@ -4,7 +4,7 @@ import { ForgotPasswordFlow } from "@/features/auth/components/forgot-password-f
 
 export default function ForgotPasswordPage() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-neutral-950 px-4 py-8">
+    <main className="flex min-h-screen items-center justify-center bg-neutral-950 ">
       <Suspense
         fallback={
           <div className="w-full max-w-md rounded-xl border border-neutral-800 bg-neutral-900 p-8 shadow-xl text-center">

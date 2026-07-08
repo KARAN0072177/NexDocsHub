@@ -13,6 +13,8 @@ import {
   type ForgotPasswordVerifySchema,
   type ForgotPasswordResetSchema,
 } from "../schemas/forgot-password.schema";
+import { AuthShell, AuthField, authInputClass } from "./auth-shell";
+import { IconMail, IconUser, IconLock, IconSpinner, IconAlert, IconCheck, IconClock } from "./auth-icons";
 
 type FlowStep = "REQUEST" | "VERIFY" | "RESET";
 
@@ -176,84 +178,109 @@ export function ForgotPasswordFlow() {
   // Render Step 1: Request Reset
   if (step === "REQUEST") {
     return (
-      <div className="w-full max-w-md rounded-xl border border-neutral-800 bg-neutral-900 p-8 shadow-xl">
-        <h1 className="text-3xl font-bold text-white">Reset Password</h1>
-        <p className="mt-2 text-sm text-neutral-400">
-          Enter your email or username and we will send you a code.
-        </p>
+      <AuthShell
+        footer={
+          <Link
+            href="/login"
+            className="text-xs text-neutral-400 hover:text-white transition font-medium"
+          >
+            Back to log in
+          </Link>
+        }
+      >
+        <div className="space-y-1.5">
+          <h1 className="text-xl font-bold tracking-tight text-white">Reset Password</h1>
+          <p className="text-xs text-neutral-500 font-medium font-sans">
+            Enter your email or username and we will send you a code.
+          </p>
+        </div>
 
         <form
           onSubmit={requestForm.handleSubmit(onRequestSubmit)}
-          className="mt-8 space-y-5"
+          className="mt-6 space-y-4"
         >
-          <div>
+          <div className="space-y-1.5">
             <label
               htmlFor="identifier"
-              className="mb-2 block text-sm font-medium text-neutral-200"
+              className="block text-[10px] font-bold uppercase tracking-wider text-neutral-500"
             >
               Email or Username
             </label>
-            <input
-              id="identifier"
-              type="text"
-              placeholder="you@example.com"
-              disabled={requestForm.formState.isSubmitting}
-              {...requestForm.register("identifier")}
-              className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-3 text-white outline-none transition focus:border-blue-500"
-            />
+            <AuthField icon={<IconUser className="h-[18px] w-[18px]" />}>
+              <input
+                id="identifier"
+                type="text"
+                placeholder="you@example.com"
+                disabled={requestForm.formState.isSubmitting}
+                {...requestForm.register("identifier")}
+                className={authInputClass}
+              />
+            </AuthField>
             {requestForm.formState.errors.identifier && (
-              <p className="mt-1 text-sm text-red-500">
+              <p className="text-[11px] font-semibold text-rose-450 mt-1">
                 {requestForm.formState.errors.identifier.message}
               </p>
             )}
           </div>
 
           {serverError && (
-            <div className="rounded-lg border border-red-900 bg-red-950/40 p-3 text-sm text-red-400 break-words">
-              {serverError}
+            <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-3.5 text-xs font-semibold text-red-400 flex items-start gap-2.5 break-words">
+              <IconAlert className="h-4 w-4 shrink-0 mt-0.5" />
+              <span>{serverError}</span>
             </div>
           )}
 
           <button
             type="submit"
             disabled={requestForm.formState.isSubmitting}
-            className="w-full rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 py-3 text-xs font-bold text-white transition-all shadow-lg shadow-blue-950/40 hover:shadow-blue-500/20 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
-            {requestForm.formState.isSubmitting
-              ? "Sending code..."
-              : "Send Code"}
+            {requestForm.formState.isSubmitting ? (
+              <>
+                <IconSpinner className="h-4 w-4 text-white" />
+                <span>Sending code...</span>
+              </>
+            ) : (
+              <span>Send Code</span>
+            )}
           </button>
-
-          <div className="mt-4 text-center">
-            <Link
-              href="/login"
-              className="text-sm text-neutral-400 hover:text-white transition"
-            >
-              Back to log in
-            </Link>
-          </div>
         </form>
-      </div>
+      </AuthShell>
     );
   }
 
   // Render Step 2: Verify OTP
   if (step === "VERIFY") {
     return (
-      <div className="w-full max-w-md rounded-xl border border-neutral-800 bg-neutral-900 p-8 shadow-xl">
-        <h1 className="text-2xl font-bold text-white">Enter Security Code</h1>
-        <p className="mt-2 text-sm text-neutral-400">
-          We sent a verification code to <span className="font-semibold text-white">{censoredEmail}</span>.
-        </p>
+      <AuthShell
+        footer={
+          <button
+            type="button"
+            onClick={() => {
+              setStep("REQUEST");
+              setServerError("");
+            }}
+            className="text-xs text-neutral-400 hover:text-white transition font-medium"
+          >
+            Change email
+          </button>
+        }
+      >
+        <div className="space-y-1.5">
+          <h1 className="text-xl font-bold tracking-tight text-white">Enter Security Code</h1>
+          <p className="text-xs text-neutral-500 font-medium font-sans">
+            We sent a verification code to <span className="font-semibold text-neutral-350">{censoredEmail}</span>.
+          </p>
+        </div>
 
         <form
           onSubmit={verifyForm.handleSubmit(onVerifySubmit)}
-          className="mt-8 space-y-5"
+          className="mt-6 space-y-4"
         >
-          <div>
+          <div className="space-y-1.5">
             <label
               htmlFor="otp"
-              className="mb-2 block text-sm font-medium text-neutral-200"
+              className="block text-[10px] font-bold uppercase tracking-wider text-neutral-500"
             >
               Verification Code
             </label>
@@ -264,135 +291,155 @@ export function ForgotPasswordFlow() {
               maxLength={6}
               disabled={verifyForm.formState.isSubmitting}
               {...verifyForm.register("otp")}
-              className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-3 text-center text-xl font-bold tracking-widest text-white outline-none transition focus:border-blue-500"
+              className="w-full rounded-xl border border-white/[0.12] bg-white/[0.02] py-3 text-center text-xl font-bold tracking-widest text-white placeholder:text-white/20 outline-none transition-all hover:border-white/[0.22] focus:border-blue-500/50 focus:bg-white/[0.04] focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-50"
             />
             {verifyForm.formState.errors.otp && (
-              <p className="mt-1 text-sm text-red-500">
+              <p className="text-[11px] font-semibold text-rose-455 mt-1">
                 {verifyForm.formState.errors.otp.message}
               </p>
             )}
           </div>
 
           {resendSuccess && (
-            <div className="rounded-lg border border-emerald-900 bg-emerald-950/40 p-3 text-sm text-emerald-400">
-              New code sent successfully. Check your email.
+            <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3.5 text-xs font-semibold text-emerald-400 flex items-start gap-2.5">
+              <IconCheck className="h-4 w-4 shrink-0 mt-0.5" />
+              <span>New code sent successfully. Check your email.</span>
             </div>
           )}
 
           {serverError && (
-            <div className="rounded-lg border border-red-900 bg-red-950/40 p-3 text-sm text-red-400 break-words">
-              {serverError}
+            <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-3.5 text-xs font-semibold text-red-400 flex items-start gap-2.5 break-words">
+              <IconAlert className="h-4 w-4 shrink-0 mt-0.5" />
+              <span>{serverError}</span>
             </div>
           )}
 
           <button
             type="submit"
             disabled={verifyForm.formState.isSubmitting}
-            className="w-full rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 py-3 text-xs font-bold text-white transition-all shadow-lg shadow-blue-950/40 hover:shadow-blue-500/20 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
-            {verifyForm.formState.isSubmitting
-              ? "Verifying code..."
-              : "Verify Code"}
+            {verifyForm.formState.isSubmitting ? (
+              <>
+                <IconSpinner className="h-4 w-4 text-white" />
+                <span>Verifying code...</span>
+              </>
+            ) : (
+              <span>Verify Code</span>
+            )}
           </button>
 
-          <div className="mt-4 text-center flex items-center justify-between">
+          <div className="mt-4 flex items-center justify-center">
             <button
               type="button"
               onClick={handleResendOTP}
               disabled={cooldown > 0}
-              className="text-sm text-blue-400 hover:text-blue-300 disabled:text-neutral-500 disabled:cursor-not-allowed transition"
+              className="text-xs text-blue-400 hover:text-blue-300 disabled:text-neutral-600 disabled:cursor-not-allowed transition font-medium flex items-center gap-1.5"
             >
+              <IconClock className="h-3.5 w-3.5" />
               {cooldown > 0 ? `Resend code in ${cooldown}s` : "Resend code"}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setStep("REQUEST");
-                setServerError("");
-              }}
-              className="text-sm text-neutral-400 hover:text-white transition"
-            >
-              Change email
             </button>
           </div>
         </form>
-      </div>
+      </AuthShell>
     );
   }
 
   // Render Step 3: Password Update
   return (
-    <div className="w-full max-w-md rounded-xl border border-neutral-800 bg-neutral-900 p-8 shadow-xl">
-      <h1 className="text-3xl font-bold text-white">New Password</h1>
-      <p className="mt-2 text-sm text-neutral-400">
-        Choose a secure password that you have not used recently.
-      </p>
+    <AuthShell
+      footer={
+        <Link
+          href="/login"
+          className="text-xs text-neutral-400 hover:text-white transition font-medium"
+        >
+          Cancel
+        </Link>
+      }
+    >
+      <div className="space-y-1.5">
+        <h1 className="text-xl font-bold tracking-tight text-white">New Password</h1>
+        <p className="text-xs text-neutral-500 font-medium font-sans">
+          Choose a secure password that you have not used recently.
+        </p>
+      </div>
 
       <form
         onSubmit={resetForm.handleSubmit(onResetSubmit)}
-        className="mt-8 space-y-5"
+        className="mt-6 space-y-4"
       >
         {/* New Password */}
-        <div>
+        <div className="space-y-1.5">
           <label
             htmlFor="password"
-            className="mb-2 block text-sm font-medium text-neutral-200"
+            className="block text-[10px] font-bold uppercase tracking-wider text-neutral-500"
           >
             New Password
           </label>
-          <input
-            id="password"
-            type="password"
-            disabled={resetForm.formState.isSubmitting}
-            {...resetForm.register("password")}
-            className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-3 text-white outline-none transition focus:border-blue-500"
-          />
+          <AuthField icon={<IconLock className="h-[18px] w-[18px]" />}>
+            <input
+              id="password"
+              type="password"
+              placeholder="••••••••"
+              disabled={resetForm.formState.isSubmitting}
+              {...resetForm.register("password")}
+              className={authInputClass}
+            />
+          </AuthField>
           {resetForm.formState.errors.password && (
-            <p className="mt-1 text-sm text-red-500">
+            <p className="text-[11px] font-semibold text-rose-450 mt-1">
               {resetForm.formState.errors.password.message}
             </p>
           )}
         </div>
 
         {/* Confirm Password */}
-        <div>
+        <div className="space-y-1.5">
           <label
             htmlFor="confirmPassword"
-            className="mb-2 block text-sm font-medium text-neutral-200"
+            className="block text-[10px] font-bold uppercase tracking-wider text-neutral-500"
           >
             Confirm New Password
           </label>
-          <input
-            id="confirmPassword"
-            type="password"
-            disabled={resetForm.formState.isSubmitting}
-            {...resetForm.register("confirmPassword")}
-            className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-3 text-white outline-none transition focus:border-blue-500"
-          />
+          <AuthField icon={<IconLock className="h-[18px] w-[18px]" />}>
+            <input
+              id="confirmPassword"
+              type="password"
+              placeholder="••••••••"
+              disabled={resetForm.formState.isSubmitting}
+              {...resetForm.register("confirmPassword")}
+              className={authInputClass}
+            />
+          </AuthField>
           {resetForm.formState.errors.confirmPassword && (
-            <p className="mt-1 text-sm text-red-500">
+            <p className="text-[11px] font-semibold text-rose-450 mt-1">
               {resetForm.formState.errors.confirmPassword.message}
             </p>
           )}
         </div>
 
         {serverError && (
-          <div className="rounded-lg border border-red-900 bg-red-950/40 p-3 text-sm text-red-400 break-words">
-            {serverError}
+          <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-3.5 text-xs font-semibold text-red-400 flex items-start gap-2.5 break-words">
+            <IconAlert className="h-4 w-4 shrink-0 mt-0.5" />
+            <span>{serverError}</span>
           </div>
         )}
 
         <button
           type="submit"
           disabled={resetForm.formState.isSubmitting}
-          className="w-full rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 py-3 text-xs font-bold text-white transition-all shadow-lg shadow-blue-950/40 hover:shadow-blue-500/20 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
         >
-          {resetForm.formState.isSubmitting
-            ? "Resetting password..."
-            : "Reset Password"}
+          {resetForm.formState.isSubmitting ? (
+            <>
+              <IconSpinner className="h-4 w-4 text-white" />
+              <span>Resetting password...</span>
+            </>
+          ) : (
+            <span>Reset Password</span>
+          )}
         </button>
       </form>
-    </div>
+    </AuthShell>
   );
 }

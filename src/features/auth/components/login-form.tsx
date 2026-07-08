@@ -10,6 +10,8 @@ import {
   loginSchema,
   type LoginSchema,
 } from "@/features/auth/schemas/login.schema";
+import { AuthShell, AuthField, authInputClass } from "./auth-shell";
+import { IconMail, IconLock, IconSpinner, IconAlert, IconCheck } from "./auth-icons";
 
 function AuthBanners() {
   const searchParams = useSearchParams();
@@ -19,16 +21,18 @@ function AuthBanners() {
 
   if (reset === "true") {
     return (
-      <div className="mb-6 rounded-lg border border-emerald-900 bg-emerald-950/40 p-3 text-sm text-emerald-400">
-        Password reset successfully. You can now log in with your new password.
+      <div className="mb-5 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3.5 text-xs font-semibold text-emerald-400 flex items-start gap-2.5">
+        <IconCheck className="h-4 w-4 shrink-0 mt-0.5" />
+        <span>Password reset successfully. You can now log in with your new password.</span>
       </div>
     );
   }
 
   if (verified === "true") {
     return (
-      <div className="mb-6 rounded-lg border border-emerald-900 bg-emerald-950/40 p-3 text-sm text-emerald-400">
-        Email verified successfully! You can now log in.
+      <div className="mb-5 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3.5 text-xs font-semibold text-emerald-400 flex items-start gap-2.5">
+        <IconCheck className="h-4 w-4 shrink-0 mt-0.5" />
+        <span>Email verified successfully! You can now log in.</span>
       </div>
     );
   }
@@ -43,8 +47,9 @@ function AuthBanners() {
     };
 
     return (
-      <div className="mb-6 rounded-lg border border-amber-900 bg-amber-950/40 p-3 text-sm text-amber-400">
-        {errorMessages[error] ?? "An error occurred. Please try again."}
+      <div className="mb-5 rounded-xl border border-amber-500/20 bg-amber-500/10 p-3.5 text-xs font-semibold text-amber-400 flex items-start gap-2.5">
+        <IconAlert className="h-4 w-4 shrink-0 mt-0.5" />
+        <span>{errorMessages[error] ?? "An error occurred. Please try again."}</span>
       </div>
     );
   }
@@ -110,101 +115,111 @@ export function LoginForm() {
   };
 
   return (
-    <div className="w-full max-w-md rounded-xl border border-neutral-800 bg-neutral-900 p-8 shadow-xl">
-      <h1 className="text-3xl font-bold text-white">Log in</h1>
-
-      <p className="mt-2 text-sm text-neutral-400">
-        Welcome back to NexDocsHub.
-      </p>
+    <AuthShell
+      footer={
+        <Link
+          href="/register"
+          className="text-xs text-neutral-400 hover:text-white transition font-medium"
+        >
+          Don&apos;t have an account? Sign up
+        </Link>
+      }
+    >
+      <div className="space-y-1.5">
+        <h1 className="text-xl font-bold tracking-tight text-white">Welcome back</h1>
+        <p className="text-xs text-neutral-500 font-medium font-sans">
+          Enter your credentials to access your NexDocsHub space.
+        </p>
+      </div>
 
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="mt-8 space-y-5"
+        className="mt-6 space-y-4"
       >
         <AuthBanners />
 
         {/* Email */}
-        <div>
+        <div className="space-y-1.5">
           <label
             htmlFor="email"
-            className="mb-2 block text-sm font-medium text-neutral-200"
+            className="block text-[10px] font-bold uppercase tracking-wider text-neutral-500"
           >
-            Email
+            Email Address
           </label>
-
-          <input
-            id="email"
-            type="email"
-            placeholder="you@example.com"
-            autoComplete="email"
-            disabled={isSubmitting}
-            {...register("email")}
-            className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-3 text-white outline-none transition focus:border-blue-500"
-          />
-
+          <AuthField icon={<IconMail className="h-[18px] w-[18px]" />}>
+            <input
+              id="email"
+              type="email"
+              placeholder="you@example.com"
+              autoComplete="email"
+              disabled={isSubmitting}
+              {...register("email")}
+              className={authInputClass}
+            />
+          </AuthField>
           {errors.email && (
-            <p className="mt-1 text-sm text-red-500">
+            <p className="text-[11px] font-semibold text-rose-450 mt-1">
               {errors.email.message}
             </p>
           )}
         </div>
 
         {/* Password */}
-        <div>
-          <div className="flex items-center justify-between mb-2">
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
             <label
               htmlFor="password"
-              className="text-sm font-medium text-neutral-200"
+              className="block text-[10px] font-bold uppercase tracking-wider text-neutral-500"
             >
               Password
             </label>
             <Link
               href="/forgot-password"
-              className="text-xs text-neutral-400 hover:text-white transition"
+              className="text-[11px] text-neutral-500 hover:text-white transition font-medium"
             >
               Forgot password?
             </Link>
           </div>
-
-          <input
-            id="password"
-            type="password"
-            autoComplete="current-password"
-            disabled={isSubmitting}
-            {...register("password")}
-            className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-3 text-white outline-none transition focus:border-blue-500"
-          />
-
+          <AuthField icon={<IconLock className="h-[18px] w-[18px]" />}>
+            <input
+              id="password"
+              type="password"
+              placeholder="••••••••"
+              autoComplete="current-password"
+              disabled={isSubmitting}
+              {...register("password")}
+              className={authInputClass}
+            />
+          </AuthField>
           {errors.password && (
-            <p className="mt-1 text-sm text-red-500">
+            <p className="text-[11px] font-semibold text-rose-455 mt-1">
               {errors.password.message}
             </p>
           )}
         </div>
 
         {serverError && (
-          <div className="rounded-lg border border-red-900 bg-red-950/40 p-3 text-sm text-red-400 break-words">
-            {serverError}
+          <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-3.5 text-xs font-semibold text-red-400 flex items-start gap-2.5 break-words">
+            <IconAlert className="h-4 w-4 shrink-0 mt-0.5" />
+            <span>{serverError}</span>
           </div>
         )}
 
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 py-3 text-xs font-bold text-white transition-all shadow-lg shadow-blue-950/40 hover:shadow-blue-500/20 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
         >
-          {isSubmitting ? "Logging in..." : "Log in"}
+          {isSubmitting ? (
+            <>
+              <IconSpinner className="h-4 w-4 text-white" />
+              <span>Logging in...</span>
+            </>
+          ) : (
+            <span>Log in</span>
+          )}
         </button>
-
-        <div className="mt-4 text-center">
-          <Link
-            href="/register"
-            className="text-sm text-neutral-400 hover:text-white transition"
-          >
-            Don&apos;t have an account? Sign up
-          </Link>
-        </div>
       </form>
-    </div>
+    </AuthShell>
   );
 }

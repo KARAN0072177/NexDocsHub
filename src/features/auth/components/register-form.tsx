@@ -3,13 +3,15 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
 
 import {
   registerSchema,
   type RegisterSchema,
 } from "@/features/auth/schemas";
-
 import { RegisterSuccess } from "./register-success";
+import { AuthShell, AuthField, authInputClass } from "./auth-shell";
+import { IconMail, IconUser, IconLock, IconSpinner, IconAlert } from "./auth-icons";
 
 export function RegisterForm() {
   const [serverError, setServerError] = useState("");
@@ -59,7 +61,6 @@ export function RegisterForm() {
         }
 
         setServerError(result.error.message);
-
         return;
       }
 
@@ -74,137 +75,153 @@ export function RegisterForm() {
   }
 
   return (
-    <div className="w-full max-w-md rounded-xl border border-neutral-800 bg-neutral-900 p-8 shadow-xl">
-      <h1 className="text-3xl font-bold text-white">
-        Create your account
-      </h1>
-
-      <p className="mt-2 text-sm text-neutral-400">
-        Welcome to NexDocsHub.
-      </p>
+    <AuthShell
+      footer={
+        <Link
+          href="/login"
+          className="text-xs text-neutral-400 hover:text-white transition font-medium"
+        >
+          Already have an account? Log in
+        </Link>
+      }
+    >
+      <div className="space-y-1.5">
+        <h1 className="text-xl font-bold tracking-tight text-white">Create an account</h1>
+        <p className="text-xs text-neutral-500 font-medium font-sans">
+          Sign up to begin keeping your knowledge operating system preserved.
+        </p>
+      </div>
 
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="mt-8 space-y-5"
+        className="mt-6 space-y-4"
       >
         {/* Username */}
-        <div>
+        <div className="space-y-1.5">
           <label
             htmlFor="username"
-            className="mb-2 block text-sm font-medium text-neutral-200"
+            className="block text-[10px] font-bold uppercase tracking-wider text-neutral-500"
           >
             Username
           </label>
-
-          <input
-            id="username"
-            type="text"
-            placeholder="karan"
-            autoComplete="username"
-            disabled={isSubmitting}
-            {...register("username")}
-            className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-3 text-white outline-none transition focus:border-blue-500"
-          />
-
+          <AuthField icon={<IconUser className="h-[18px] w-[18px]" />}>
+            <input
+              id="username"
+              type="text"
+              placeholder="karan"
+              autoComplete="username"
+              disabled={isSubmitting}
+              {...register("username")}
+              className={authInputClass}
+            />
+          </AuthField>
           {errors.username && (
-            <p className="mt-1 text-sm text-red-500">
+            <p className="text-[11px] font-semibold text-rose-450 mt-1">
               {errors.username.message}
             </p>
           )}
         </div>
 
         {/* Email */}
-        <div>
+        <div className="space-y-1.5">
           <label
             htmlFor="email"
-            className="mb-2 block text-sm font-medium text-neutral-200"
+            className="block text-[10px] font-bold uppercase tracking-wider text-neutral-500"
           >
-            Email
+            Email Address
           </label>
-
-          <input
-            id="email"
-            type="email"
-            placeholder="you@example.com"
-            autoComplete="email"
-            disabled={isSubmitting}
-            {...register("email")}
-            className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-3 text-white outline-none transition focus:border-blue-500"
-          />
-
+          <AuthField icon={<IconMail className="h-[18px] w-[18px]" />}>
+            <input
+              id="email"
+              type="email"
+              placeholder="you@example.com"
+              autoComplete="email"
+              disabled={isSubmitting}
+              {...register("email")}
+              className={authInputClass}
+            />
+          </AuthField>
           {errors.email && (
-            <p className="mt-1 text-sm text-red-500">
+            <p className="text-[11px] font-semibold text-rose-450 mt-1">
               {errors.email.message}
             </p>
           )}
         </div>
 
         {/* Password */}
-        <div>
+        <div className="space-y-1.5">
           <label
             htmlFor="password"
-            className="mb-2 block text-sm font-medium text-neutral-200"
+            className="block text-[10px] font-bold uppercase tracking-wider text-neutral-500"
           >
             Password
           </label>
-
-          <input
-            id="password"
-            type="password"
-            autoComplete="new-password"
-            disabled={isSubmitting}
-            {...register("password")}
-            className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-3 text-white outline-none transition focus:border-blue-500"
-          />
-
+          <AuthField icon={<IconLock className="h-[18px] w-[18px]" />}>
+            <input
+              id="password"
+              type="password"
+              placeholder="••••••••"
+              autoComplete="new-password"
+              disabled={isSubmitting}
+              {...register("password")}
+              className={authInputClass}
+            />
+          </AuthField>
           {errors.password && (
-            <p className="mt-1 text-sm text-red-500">
+            <p className="text-[11px] font-semibold text-rose-450 mt-1">
               {errors.password.message}
             </p>
           )}
         </div>
 
         {/* Confirm Password */}
-        <div>
+        <div className="space-y-1.5">
           <label
             htmlFor="confirmPassword"
-            className="mb-2 block text-sm font-medium text-neutral-200"
+            className="block text-[10px] font-bold uppercase tracking-wider text-neutral-500"
           >
             Confirm Password
           </label>
-
-          <input
-            id="confirmPassword"
-            type="password"
-            autoComplete="new-password"
-            disabled={isSubmitting}
-            {...register("confirmPassword")}
-            className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-3 text-white outline-none transition focus:border-blue-500"
-          />
-
+          <AuthField icon={<IconLock className="h-[18px] w-[18px]" />}>
+            <input
+              id="confirmPassword"
+              type="password"
+              placeholder="••••••••"
+              autoComplete="new-password"
+              disabled={isSubmitting}
+              {...register("confirmPassword")}
+              className={authInputClass}
+            />
+          </AuthField>
           {errors.confirmPassword && (
-            <p className="mt-1 text-sm text-red-500">
+            <p className="text-[11px] font-semibold text-rose-450 mt-1">
               {errors.confirmPassword.message}
             </p>
           )}
         </div>
 
         {serverError && (
-          <div className="rounded-lg border border-red-900 bg-red-950/40 p-3 text-sm text-red-400">
-            {serverError}
+          <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-3.5 text-xs font-semibold text-red-400 flex items-start gap-2.5">
+            <IconAlert className="h-4 w-4 shrink-0 mt-0.5" />
+            <span>{serverError}</span>
           </div>
         )}
 
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 py-3 text-xs font-bold text-white transition-all shadow-lg shadow-blue-950/40 hover:shadow-blue-500/20 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
         >
-          {isSubmitting
-            ? "Creating account..."
-            : "Create account"}
+          {isSubmitting ? (
+            <>
+              <IconSpinner className="h-4 w-4 text-white" />
+              <span>Creating account...</span>
+            </>
+          ) : (
+            <span>Create account</span>
+          )}
         </button>
       </form>
-    </div>
+    </AuthShell>
   );
 }
