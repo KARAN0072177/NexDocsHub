@@ -17,7 +17,9 @@ import {
   SlidersHorizontal,
   ArrowUpDown,
   X,
+  Download,
 } from "lucide-react";
+import { exportEntryToPDF } from "../utils/export-pdf";
 
 interface Attachment {
   name: string;
@@ -524,16 +526,30 @@ export function EntryList({
                                 </div>
                               </div>
 
-                              <span
-                                className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-bold flex-shrink-0 ${config.color}`}
-                              >
-                                <Icon className="h-3 w-3" />
-                                <span>
-                                  {entry.type === "custom" && entry.customType
-                                    ? entry.customType
-                                    : config.label}
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                <span
+                                  className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-bold ${config.color}`}
+                                >
+                                  <Icon className="h-3 w-3" />
+                                  <span>
+                                    {entry.type === "custom" && entry.customType
+                                      ? entry.customType
+                                      : config.label}
+                                  </span>
                                 </span>
-                              </span>
+
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    exportEntryToPDF(entry, categoryName);
+                                  }}
+                                  className="glass-focus flex h-7 w-7 items-center justify-center rounded-lg border border-white/[0.06] bg-white/[0.02] text-neutral-500 hover:text-white hover:bg-white/[0.08] hover:border-white/[0.12] transition-all duration-150"
+                                  title="Export Entry to PDF"
+                                >
+                                  <Download className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
                             </div>
 
                             {entry.tags.length > 0 && (
