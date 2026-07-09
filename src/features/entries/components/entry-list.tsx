@@ -119,18 +119,18 @@ export const typeConfig: Record<
   custom: {
     label: "Custom",
     icon: FileText,
-    color: "text-neutral-300 bg-neutral-300/10 border-neutral-300/20",
-    dot: "bg-neutral-300",
-    glow: "shadow-neutral-500/10",
+    color: "text-orange-400 bg-orange-400/10 border-orange-400/20",
+    dot: "bg-orange-400",
+    glow: "shadow-orange-500/10",
   },
 };
 
 const fallbackConfig = {
   label: "Entry",
   icon: FileText,
-  color: "text-neutral-400 bg-neutral-400/10 border-neutral-400/20",
-  dot: "bg-neutral-400",
-  glow: "shadow-neutral-500/10",
+  color: "text-orange-400 bg-orange-400/10 border-orange-400/20",
+  dot: "bg-orange-400",
+  glow: "shadow-orange-500/10",
 };
 
 function groupByDay(entries: Entry[]) {
