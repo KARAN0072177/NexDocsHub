@@ -4,6 +4,7 @@ import crypto from "crypto";
 import { loginSchema, type LoginSchema } from "../schemas/login.schema";
 import { userRepository } from "../repositories/user.repository";
 import { rateLimitService } from "./rate-limit.service";
+import { authLogService } from "./auth-log.service";
 import { Session } from "@/models/Session";
 import type { ServiceResult } from "@/features/auth/types/service-result";
 
@@ -36,6 +37,15 @@ class LoginService {
     const validation = loginSchema.safeParse(input);
 
     if (!validation.success) {
+      await authLogService.logAction({
+        action: "login_failed",
+        email: input.email || "",
+        ipAddress: ip,
+        status: "failed",
+        reason: "Validation error",
+        userAgent,
+      });
+
       return {
         success: false,
         error: {
@@ -62,6 +72,15 @@ class LoginService {
     );
 
     if (!ipLimit.allowed || !emailLimit.allowed) {
+      await authLogService.logAction({
+        action: "login_failed",
+        email,
+        ipAddress: ip,
+        status: "failed",
+        reason: "Rate limit lockout",
+        userAgent,
+      });
+
       return {
         success: false,
         error: {
@@ -86,6 +105,15 @@ class LoginService {
         EMAIL_LIMIT_CONFIG
       );
 
+      await authLogService.logAction({
+        action: "login_failed",
+        email,
+        ipAddress: ip,
+        status: "failed",
+        reason: "Invalid email or password",
+        userAgent,
+      });
+
       return {
         success: false,
         error: {
@@ -97,6 +125,15 @@ class LoginService {
 
     // 4. Check if email is verified
     if (user.emailVerified === false) {
+      await authLogService.logAction({
+        action: "login_failed",
+        email,
+        ipAddress: ip,
+        status: "failed",
+        reason: "Email not verified",
+        userAgent,
+      });
+
       return {
         success: false,
         error: {
@@ -118,6 +155,15 @@ class LoginService {
         emailKey,
         EMAIL_LIMIT_CONFIG
       );
+
+      await authLogService.logAction({
+        action: "login_failed",
+        email,
+        ipAddress: ip,
+        status: "failed",
+        reason: "Invalid email or password",
+        userAgent,
+      });
 
       return {
         success: false,
@@ -141,6 +187,14 @@ class LoginService {
       userId: user._id,
       expiresAt,
       ipAddress: ip,
+      userAgent,
+    });
+
+    await authLogService.logAction({
+      action: "login",
+      email,
+      ipAddress: ip,
+      status: "success",
       userAgent,
     });
 

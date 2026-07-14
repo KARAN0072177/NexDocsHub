@@ -10,29 +10,50 @@ import { pendingUserRepository } from "../repositories/pending-user.repository";
 import { generateVerificationToken } from "../utils/generate-token";
 import { hashToken } from "../utils/hash-token";
 import { sendVerificationEmail } from "../emails/send-verification-email";
+import { authLogService } from "./auth-log.service";
 
 class RegisterService {
   async register(
-    input: RegisterDTO
+    input: RegisterDTO,
+    ip: string,
+    userAgent?: string
   ): Promise<ServiceResult<{ email: string }>> {
     const validation = registerSchema.safeParse(input);
 
-if (!validation.success) {
-  return {
-    success: false,
-    error: {
-      code: "VALIDATION_ERROR",
-      message: "Please correct the highlighted fields.",
-      fieldErrors: validation.error.flatten().fieldErrors,
-    },
-  } as ServiceResult<{ email: string }>;
-}
+    if (!validation.success) {
+      await authLogService.logAction({
+        action: "register_failed",
+        email: input.email || "",
+        ipAddress: ip,
+        status: "failed",
+        reason: "Validation error",
+        userAgent,
+      });
+
+      return {
+        success: false,
+        error: {
+          code: "VALIDATION_ERROR",
+          message: "Please correct the highlighted fields.",
+          fieldErrors: validation.error.flatten().fieldErrors,
+        },
+      } as ServiceResult<{ email: string }>;
+    }
 
     const { username, email, password } = validation.data;
 
     const existingUserByEmail = await userRepository.findByEmail(email);
 
     if (existingUserByEmail) {
+      await authLogService.logAction({
+        action: "register_failed",
+        email,
+        ipAddress: ip,
+        status: "failed",
+        reason: "Email already exists",
+        userAgent,
+      });
+
       return {
         success: false,
         error: {
@@ -46,6 +67,15 @@ if (!validation.success) {
       await userRepository.findByUsername(username);
 
     if (existingUserByUsername) {
+      await authLogService.logAction({
+        action: "register_failed",
+        email,
+        ipAddress: ip,
+        status: "failed",
+        reason: "Username already exists",
+        userAgent,
+      });
+
       return {
         success: false,
         error: {
@@ -59,14 +89,10 @@ if (!validation.success) {
 
     const verificationToken = generateVerificationToken();
 
-    const verificationTokenHash =
-      hashToken(verificationToken);
+    const verificationTokenHash = hashToken(verificationToken);
 
     const expiresAt = new Date(
-      Date.now() +
-        AUTH_CONFIG.VERIFICATION.EXPIRY_MINUTES *
-          60 *
-          1000
+      Date.now() + AUTH_CONFIG.VERIFICATION.EXPIRY_MINUTES * 60 * 1000
     );
 
     const existingPendingUser =
@@ -92,6 +118,14 @@ if (!validation.success) {
       email,
       username,
       verificationToken,
+    });
+
+    await authLogService.logAction({
+      action: "register",
+      email,
+      ipAddress: ip,
+      status: "success",
+      userAgent,
     });
 
     return {

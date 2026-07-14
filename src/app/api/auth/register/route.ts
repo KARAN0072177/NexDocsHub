@@ -67,8 +67,9 @@ export async function POST(request: NextRequest) {
     // Record the registration attempt
     await rateLimitService.recordFailure(ipKey, REGISTER_LIMIT_CONFIG);
 
+    const userAgent = request.headers.get("user-agent") ?? undefined;
     const body = await request.json();
-    const result = await registerService.register(body);
+    const result = await registerService.register(body, ip, userAgent);
 
     if (!result.success) {
       const statusCode: Record<string, number> = {

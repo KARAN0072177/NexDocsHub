@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { dbConnect } from "@/lib/db";
 import { Session } from "@/models/Session";
 import { User } from "@/models/User";
+import { AuthLog } from "@/models/AuthLog";
 import { AdminDashboardClient } from "./admin-dashboard-client";
 
 export default async function AdminDashboard() {
@@ -36,13 +37,30 @@ export default async function AdminDashboard() {
     .sort({ createdAt: -1 })
     .lean();
 
-  // 4. Serialize database results to plain JSON for Client Component hydration
+  // 4. Fetch Recent Auth Logs (limit to 100 recent events)
+  const logsList = await AuthLog.find()
+    .sort({ timestamp: -1 })
+    .limit(100)
+    .lean();
+
+  // 5. Serialize database results to plain JSON for Client Component hydration
   const plainUsers = usersList.map((userDoc: any) => ({
     id: userDoc._id.toString(),
     username: userDoc.username || "Unknown",
     email: userDoc.email || "Unknown",
     role: userDoc.role || "user",
     createdAt: userDoc.createdAt ? userDoc.createdAt.toISOString() : null,
+  }));
+
+  const plainLogs = logsList.map((logDoc: any) => ({
+    id: logDoc._id.toString(),
+    action: logDoc.action,
+    email: logDoc.email || "",
+    ipAddress: logDoc.ipAddress,
+    userAgent: logDoc.userAgent || "",
+    status: logDoc.status,
+    reason: logDoc.reason || "",
+    timestamp: logDoc.timestamp ? logDoc.timestamp.toISOString() : null,
   }));
 
   const plainCurrentUser = {
@@ -54,6 +72,7 @@ export default async function AdminDashboard() {
   return (
     <AdminDashboardClient
       initialUsers={plainUsers}
+      initialLogs={plainLogs}
       currentUser={plainCurrentUser}
     />
   );
