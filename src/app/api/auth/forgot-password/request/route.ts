@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { dbConnect } from "@/lib/db";
 import { forgotPasswordService } from "@/features/auth/services/forgot-password.service";
 import { rateLimitService } from "@/features/auth/services/rate-limit.service";
+import { ipBanService } from "@/features/auth/services/ip-ban.service";
 import { forgotPasswordRequestSchema } from "@/features/auth/schemas/forgot-password.schema";
 
 function getClientIp(request: NextRequest): string {
@@ -28,22 +29,37 @@ export async function POST(request: NextRequest) {
     await dbConnect();
 
     const ip = getClientIp(request);
+
+    // 1. IP Ban check
+    if (await ipBanService.isBanned(ip)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "IP_BANNED",
+            message:
+              "Access denied. This IP address has been banned for suspicious activity.",
+          },
+        },
+        { status: 403 }
+      );
+    }
+
     const ipKey = `rate-limit:forgot-password:request:ip:${ip}`;
 
-    // 1. Check IP rate limit
+    // 2. Check IP rate limit
     const ipLimit = await rateLimitService.evaluate(
       ipKey,
       REQUEST_LIMIT_CONFIG
     );
 
     if (!ipLimit.allowed) {
-      const blockedUntil = ipLimit.blockedUntil;
       return NextResponse.json(
         {
           success: false,
           error: {
             code: "TOO_MANY_REQUESTS",
-            message: `Too many password reset requests. Locked out until ${blockedUntil?.toLocaleTimeString()}.`,
+            message: "Too many password reset requests. Please try again later.",
           },
         },
         { status: 429 }

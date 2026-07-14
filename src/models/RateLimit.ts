@@ -16,6 +16,10 @@ const RateLimitSchema = new Schema(
       type: Date,
       default: null,
     },
+    blockCount: {
+      type: Number,
+      default: 0,
+    },
     expiresAt: {
       type: Date,
       required: true,

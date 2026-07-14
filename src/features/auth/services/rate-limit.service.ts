@@ -1,9 +1,24 @@
 import { RateLimit } from "@/models/RateLimit";
+import { ipBanService } from "./ip-ban.service";
 
 export interface RateLimitConfig {
   maxAttempts: number;
   windowMinutes: number;
   blockMinutes: number;
+}
+
+async function checkAndTriggerIpBan(key: string) {
+  // Extract IP if key contains :ip:
+  const parts = key.split(":");
+  const ipIndex = parts.indexOf("ip");
+  if (ipIndex !== -1 && parts[ipIndex + 1]) {
+    const ip = parts[ipIndex + 1];
+    await ipBanService.banIp(
+      ip,
+      "Automated ban: 3 consecutive rate limit lockouts reached.",
+      7 // 7 days ban
+    );
+  }
 }
 
 class RateLimitService {
@@ -55,24 +70,39 @@ class RateLimitService {
   ): Promise<void> {
     const now = new Date();
     const record = await RateLimit.findOne({ key });
+    
+    // Check if already blocked in current active window
+    const wasBlocked = record ? (record.blockedUntil && record.blockedUntil > now) : false;
 
     if (!record) {
       const expiresAt = new Date(
         now.getTime() + config.windowMinutes * 60 * 1000
       );
+      const isBlocked = 1 >= config.maxAttempts;
+      const blockedUntil = isBlocked
+        ? new Date(now.getTime() + config.blockMinutes * 60 * 1000)
+        : null;
+      const blockCount = isBlocked ? 1 : 0;
+
       await RateLimit.create({
         key,
         attempts: 1,
-        blockedUntil: null,
-        expiresAt,
+        blockedUntil,
+        blockCount,
+        expiresAt: blockedUntil ? new Date(blockedUntil.getTime() + 60 * 1000) : expiresAt,
       });
+
+      if (isBlocked && blockCount >= 3) {
+        await checkAndTriggerIpBan(key);
+      }
       return;
     }
 
-    // If the previous window had expired, reset attempts
+    // If the previous window had expired, reset attempts and block status
     if (record.expiresAt < now) {
       record.attempts = 1;
       record.blockedUntil = null;
+      (record as any).blockCount = 0;
       record.expiresAt = new Date(
         now.getTime() + config.windowMinutes * 60 * 1000
       );
@@ -80,18 +110,28 @@ class RateLimitService {
       record.attempts += 1;
     }
 
-    // If attempts exceed max attempts, block them
-    if (record.attempts >= config.maxAttempts) {
+    const isNowBlocked = record.attempts >= config.maxAttempts;
+
+    if (isNowBlocked) {
       const blockedUntil = new Date(
         now.getTime() + config.blockMinutes * 60 * 1000
       );
       record.blockedUntil = blockedUntil;
-      // Ensure the record isn't deleted by TTL index while blocked.
-      // We extend the TTL index field (expiresAt) to 1 minute past block expiration.
       record.expiresAt = new Date(blockedUntil.getTime() + 60 * 1000);
+
+      // Increment blockCount if transitioning to a blocked state for the first time in this window
+      if (!wasBlocked) {
+        const currentBlockCount = (record as any).blockCount || 0;
+        (record as any).blockCount = currentBlockCount + 1;
+      }
     }
 
     await record.save();
+
+    // Check if we need to escalate to IP ban
+    if (isNowBlocked && (record as any).blockCount >= 3) {
+      await checkAndTriggerIpBan(key);
+    }
   }
 
   /**

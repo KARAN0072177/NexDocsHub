@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 
 import { dbConnect } from "@/lib/db";
 import { loginService } from "@/features/auth/services/login.service";
+import { ipBanService } from "@/features/auth/services/ip-ban.service";
 
 function getClientIp(request: NextRequest): string {
   const forwardedFor = request.headers.get("x-forwarded-for");
@@ -26,7 +27,24 @@ export async function POST(request: NextRequest) {
     const ip = getClientIp(request);
     const userAgent = request.headers.get("user-agent") ?? undefined;
 
-    // 3. Invoke Login Service
+    // 3. IP Ban Check
+    if (await ipBanService.isBanned(ip)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "IP_BANNED",
+            message:
+              "Access denied. This IP address has been banned for suspicious activity.",
+          },
+        },
+        {
+          status: 403,
+        }
+      );
+    }
+
+    // 4. Invoke Login Service
     const result = await loginService.login(body, ip, userAgent);
 
     if (!result.success) {

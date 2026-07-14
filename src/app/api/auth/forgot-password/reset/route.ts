@@ -37,13 +37,12 @@ export async function POST(request: NextRequest) {
     );
 
     if (!ipLimit.allowed) {
-      const blockedUntil = ipLimit.blockedUntil;
       return NextResponse.json(
         {
           success: false,
           error: {
             code: "TOO_MANY_REQUESTS",
-            message: `Too many password reset attempts. Locked out until ${blockedUntil?.toLocaleTimeString()}.`,
+            message: "Too many password reset attempts. Please try again later.",
           },
         },
         { status: 429 }

@@ -62,17 +62,11 @@ class LoginService {
     );
 
     if (!ipLimit.allowed || !emailLimit.allowed) {
-      const blockedUntil =
-        (ipLimit.blockedUntil?.getTime() ?? 0) >
-        (emailLimit.blockedUntil?.getTime() ?? 0)
-          ? ipLimit.blockedUntil
-          : emailLimit.blockedUntil;
-
       return {
         success: false,
         error: {
           code: "TOO_MANY_REQUESTS",
-          message: `Too many login attempts. Locked out until ${blockedUntil?.toLocaleTimeString()}.`,
+          message: "Too many login attempts. Please try again later.",
         },
       };
     }
