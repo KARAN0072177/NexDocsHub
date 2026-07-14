@@ -1,4 +1,10 @@
 import type { ReactNode } from "react";
+import dynamic from "next/dynamic";
+
+const ParticlesBackground = dynamic(
+  () => import("./particles-background"),
+  { ssr: false }
+);
 
 /**
  * Shared shell for all auth screens: ambient grid + glow background,
@@ -28,7 +34,10 @@ export function AuthShell({
       <div className="pointer-events-none absolute -top-40 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-[#6C5CE7]/20 blur-[120px]" />
       <div className="pointer-events-none absolute bottom-[-160px] right-[-80px] h-[420px] w-[420px] rounded-full bg-[#22D3EE]/10 blur-[120px]" />
 
-      <div className="relative w-full max-w-md">
+      {/* tsParticles dynamic ambient layout background */}
+      <ParticlesBackground />
+
+      <div className="relative z-10 w-full max-w-md">
         {/* Wordmark */}
         <div className="mb-7 flex items-center justify-center gap-2.5 animate-fade-in">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#6C5CE7] to-[#22D3EE] shadow-[0_0_20px_-4px_rgba(108,92,231,0.6)]">
