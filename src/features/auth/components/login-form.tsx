@@ -108,7 +108,11 @@ export function LoginForm() {
         return;
       }
 
-      router.replace("/");
+      if (result.data?.role === "admin") {
+        router.replace("/admin");
+      } else {
+        router.replace("/");
+      }
       router.refresh();
     } catch {
       setServerError("Something went wrong. Please try again.");

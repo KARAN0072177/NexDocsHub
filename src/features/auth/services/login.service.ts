@@ -32,7 +32,7 @@ class LoginService {
     input: LoginSchema,
     ip: string,
     userAgent?: string
-  ): Promise<ServiceResult<{ sessionToken: string }>> {
+  ): Promise<ServiceResult<{ sessionToken: string; role: string }>> {
     const validation = loginSchema.safeParse(input);
 
     if (!validation.success) {
@@ -148,6 +148,7 @@ class LoginService {
       success: true,
       data: {
         sessionToken,
+        role: user.role,
       },
     };
   }

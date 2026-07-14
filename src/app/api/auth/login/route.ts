@@ -75,7 +75,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: true,
-        data: null,
+        data: {
+          role: result.data.role,
+        },
       },
       {
         status: 200,

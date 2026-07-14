@@ -39,14 +39,22 @@ export default async function Home() {
     redirect("/login");
   }
 
-  // 4. Auto-provision Workspace if missing
+  // 4. Auto-provision Workspace if missing (wrapped in try/catch to handle concurrent request races)
   let workspace = await Workspace.findOne({ userId: user._id }).lean();
   if (!workspace) {
-    const createdWorkspace = await Workspace.create({
-      name: `${user.username}'s Workspace`,
-      userId: user._id,
-    });
-    workspace = createdWorkspace.toObject();
+    try {
+      const createdWorkspace = await Workspace.create({
+        name: `${user.username}'s Workspace`,
+        userId: user._id,
+      });
+      workspace = createdWorkspace.toObject();
+    } catch (err: any) {
+      if (err.code === 11000) {
+        workspace = await Workspace.findOne({ userId: user._id }).lean();
+      } else {
+        throw err;
+      }
+    }
   }
 
   // 5. Fetch Categories

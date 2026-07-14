@@ -109,15 +109,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Resolve or provision user workspace
+    // Resolve or provision user workspace (wrapped in try/catch to handle concurrent request races)
     let workspace = await Workspace.findOne({ userId }).lean();
     if (!workspace) {
       const userRecord = await User.findById(userId).lean();
       const username = userRecord?.username ?? "User";
-      workspace = await Workspace.create({
-        name: `${username}'s Workspace`,
-        userId,
-      });
+      try {
+        workspace = await Workspace.create({
+          name: `${username}'s Workspace`,
+          userId,
+        });
+      } catch (err: any) {
+        if (err.code === 11000) {
+          workspace = await Workspace.findOne({ userId }).lean();
+        } else {
+          throw err;
+        }
+      }
     }
 
     const { name } = validation.data;
