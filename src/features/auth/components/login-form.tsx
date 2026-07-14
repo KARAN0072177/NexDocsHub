@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 import {
@@ -58,6 +58,7 @@ function AuthBanners() {
 }
 
 export function LoginForm() {
+  const router = useRouter();
   const [serverError, setServerError] = useState("");
 
   const {
@@ -107,8 +108,8 @@ export function LoginForm() {
         return;
       }
 
-      // Hard redirect to homepage to reload Layout and cookies
-      window.location.href = "/";
+      router.replace("/");
+      router.refresh();
     } catch {
       setServerError("Something went wrong. Please try again.");
     }

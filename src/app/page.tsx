@@ -8,6 +8,12 @@ import { Workspace } from "@/models/Workspace";
 import { Category } from "@/models/Category";
 import { AppShell } from "@/features/workspace/components/app-shell";
 
+interface CategoryDocument {
+  _id: { toString(): string };
+  name: string;
+  isPinned?: boolean;
+}
+
 export default async function Home() {
   // 1. Establish database connection
   await dbConnect();
@@ -54,7 +60,7 @@ export default async function Home() {
     email: user.email as string,
   };
 
-  const plainCategories = categories.map((cat: any) => ({
+  const plainCategories = (categories as CategoryDocument[]).map((cat) => ({
     id: cat._id.toString() as string,
     name: cat.name as string,
     isPinned: !!cat.isPinned,

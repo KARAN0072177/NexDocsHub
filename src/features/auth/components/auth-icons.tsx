@@ -1,5 +1,3 @@
-import type { ReactNode } from "react";
-
 export function IconMail(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.75" stroke="currentColor" {...props}>

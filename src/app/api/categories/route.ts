@@ -33,7 +33,7 @@ async function getAuthenticatedUserId(): Promise<string | null> {
   return sessionRecord.userId.toString();
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     await dbConnect();
 

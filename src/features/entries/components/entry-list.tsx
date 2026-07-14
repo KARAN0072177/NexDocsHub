@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import type { LucideIcon } from "lucide-react";
 import {
   FileText,
   BookOpen,
@@ -51,7 +52,7 @@ interface EntryListProps {
 
 export const typeConfig: Record<
   string,
-  { label: string; icon: any; color: string; dot: string; glow: string }
+  { label: string; icon: LucideIcon; color: string; dot: string; glow: string }
 > = {
   learning_day: {
     label: "Learning Day",
@@ -368,7 +369,7 @@ export function EntryList({
             <Bug className="h-6 w-6" />
           </div>
           <h3 className="font-semibold text-white text-base" style={{ fontFamily: "var(--font-display)" }}>
-            Couldn't load entries
+            Couldn&apos;t load entries
           </h3>
           <p className="mt-1.5 text-xs text-neutral-500 leading-relaxed">
             Something went wrong reaching the server. Check your connection and try again.
@@ -462,7 +463,7 @@ export function EntryList({
           {/* Timeline */}
           {filteredEntries.length > 0 ? (
             <div className="flex-1 overflow-y-auto pr-1 -mr-1">
-              {groups.map((group, groupIdx) => (
+              {groups.map((group) => (
                 <div key={group.key} className="mb-6 last:mb-2">
                   <div
                     className="sticky top-0 z-10 -mx-1 mb-3 flex items-center gap-2 bg-gradient-to-b from-neutral-950 via-neutral-950/95 to-transparent px-1 py-1.5 backdrop-blur-sm"

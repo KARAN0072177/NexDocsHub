@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useMemo, useState } from "react";
+import Image from "next/image";
 import { marked } from "marked";
 import {
   FileText,
@@ -13,6 +14,8 @@ import {
   ArrowLeft,
   Loader2,
   ExternalLink,
+  Copy,
+  Check,
 } from "lucide-react";
 
 import { typeConfig } from "./entry-list";
@@ -51,17 +54,27 @@ export function EntryDetail({
   onDelete,
   onBack,
 }: EntryDetailProps) {
-  const [htmlContent, setHtmlContent] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteError, setDeleteError] = useState("");
+  const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
+  const handleCopyContent = async () => {
     try {
-      const html = marked.parse(entry.content) as string;
-      setHtmlContent(html);
+      await navigator.clipboard.writeText(entry.content || "");
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy text:", err);
+    }
+  };
+
+  const htmlContent = useMemo(() => {
+    try {
+      return marked.parse(entry.content) as string;
     } catch (err) {
       console.error("Markdown parse error:", err);
+      return "";
     }
   }, [entry.content]);
 
@@ -304,15 +317,38 @@ export function EntryDetail({
 
         {/* Content body */}
         {entry.format !== "files" && (
-          <div className="prose prose-invert max-w-none text-neutral-300 leading-relaxed font-sans min-h-[150px]">
-            {htmlContent ? (
-              <div
-                dangerouslySetInnerHTML={{ __html: htmlContent }}
-                className="space-y-4 prose-detail"
-              />
-            ) : (
-              <p className="text-neutral-600 text-sm italic">No content text.</p>
+          <div className="relative group border border-white/[0.06] bg-white/[0.01] rounded-2xl p-6 min-h-[150px]">
+            {htmlContent && (
+              <button
+                type="button"
+                onClick={handleCopyContent}
+                className="glass-focus absolute right-4 top-4 flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-neutral-900/60 hover:bg-neutral-900 hover:border-white/[0.15] px-2.5 py-1.5 text-[10px] font-bold text-neutral-400 hover:text-white transition duration-155 shadow-md backdrop-blur-sm"
+                title="Copy editor content"
+              >
+                {copied ? (
+                  <>
+                    <Check className="h-3.5 w-3.5 text-emerald-450" />
+                    <span className="text-emerald-450 font-semibold">Copied!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-3.5 w-3.5" />
+                    <span>Copy</span>
+                  </>
+                )}
+              </button>
             )}
+
+            <div className="prose prose-invert max-w-none text-neutral-300 leading-relaxed font-sans pr-16">
+              {htmlContent ? (
+                <div
+                  dangerouslySetInnerHTML={{ __html: htmlContent }}
+                  className="space-y-4 prose-detail"
+                />
+              ) : (
+                <p className="text-neutral-600 text-sm italic">No content text.</p>
+              )}
+            </div>
           </div>
         )}
 
@@ -341,10 +377,13 @@ export function EntryDetail({
                     {/* Direct Image Preview */}
                     {isImage && (
                       <div className="relative aspect-video w-full border-b border-white/[0.06] bg-black/40 flex items-center justify-center overflow-hidden group">
-                        <img
+                        <Image
                           src={file.url}
                           alt={file.name}
-                          className="object-contain max-h-full max-w-full transition duration-300 group-hover:scale-102"
+                          fill
+                          unoptimized
+                          sizes="(min-width: 640px) 50vw, 100vw"
+                          className="object-contain transition duration-300 group-hover:scale-102"
                         />
                         <a
                           href={file.url}

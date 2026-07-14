@@ -9,6 +9,17 @@ import { Category } from "@/models/Category";
 import { Entry } from "@/models/Entry";
 import { entrySchema } from "@/features/entries/schemas/entry.schema";
 
+interface Attachment {
+  name: string;
+  url: string;
+  mimeType: string;
+  size: number;
+}
+
+interface EntryDocument {
+  attachments: Attachment[];
+}
+
 const s3Client = new S3Client({
   region: process.env.AWS_REGION!,
   credentials: {
@@ -34,7 +45,7 @@ async function getAuthenticatedUserId(): Promise<string | null> {
   return sessionRecord.userId.toString();
 }
 
-async function signAttachments(attachments: any[]): Promise<any[]> {
+async function signAttachments(attachments: Attachment[]): Promise<Attachment[]> {
   return Promise.all(
     attachments.map(async (att) => {
       try {
@@ -118,7 +129,7 @@ export async function GET(request: NextRequest) {
 
     // Map and sign attachments dynamically
     const signedEntries = await Promise.all(
-      entries.map(async (entry: any) => ({
+      (entries as EntryDocument[]).map(async (entry) => ({
         ...entry,
         attachments: await signAttachments(entry.attachments),
       }))

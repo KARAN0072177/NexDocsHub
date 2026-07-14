@@ -54,7 +54,7 @@ class RateLimitService {
     config: RateLimitConfig
   ): Promise<void> {
     const now = new Date();
-    let record = await RateLimit.findOne({ key });
+    const record = await RateLimit.findOne({ key });
 
     if (!record) {
       const expiresAt = new Date(

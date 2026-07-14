@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 import {
@@ -14,11 +15,12 @@ import {
   type ForgotPasswordResetSchema,
 } from "../schemas/forgot-password.schema";
 import { AuthShell, AuthField, authInputClass } from "./auth-shell";
-import { IconMail, IconUser, IconLock, IconSpinner, IconAlert, IconCheck, IconClock } from "./auth-icons";
+import { IconUser, IconLock, IconSpinner, IconAlert, IconCheck, IconClock } from "./auth-icons";
 
 type FlowStep = "REQUEST" | "VERIFY" | "RESET";
 
 export function ForgotPasswordFlow() {
+  const router = useRouter();
   const [step, setStep] = useState<FlowStep>("REQUEST");
   const [email, setEmail] = useState("");
   const [censoredEmail, setCensoredEmail] = useState("");
@@ -141,8 +143,7 @@ export function ForgotPasswordFlow() {
         return;
       }
 
-      // Successful password change redirect
-      window.location.href = "/login?reset=true";
+      router.replace("/login?reset=true");
     } catch {
       setServerError("Something went wrong. Please try again.");
     }

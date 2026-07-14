@@ -5,6 +5,28 @@ import { Session } from "@/models/Session";
 import { Entry } from "@/models/Entry";
 import { Category } from "@/models/Category";
 
+interface SearchAttachment {
+  name: string;
+}
+
+interface PopulatedCategory {
+  _id?: { toString(): string };
+  name?: string;
+  toString?: () => string;
+}
+
+interface SearchEntry {
+  _id: { toString(): string };
+  title: string;
+  type: string;
+  customType?: string;
+  tags: string[];
+  categoryId?: PopulatedCategory;
+  format?: "note" | "files";
+  content?: string;
+  attachments?: SearchAttachment[];
+}
+
 async function getAuthenticatedUserId(): Promise<string | null> {
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get("session")?.value;
@@ -98,9 +120,10 @@ export async function GET(request: NextRequest) {
       .limit(15)
       .lean();
 
-    const searchResults = entries.map((entry: any) => {
+    const searchResults = (entries as SearchEntry[]).map((entry) => {
       const categoryName = entry.categoryId?.name ?? "Uncategorized";
-      const categoryId = entry.categoryId?._id?.toString() ?? entry.categoryId?.toString();
+      const categoryId =
+        entry.categoryId?._id?.toString() ?? entry.categoryId?.toString?.();
 
       return {
         id: entry._id.toString(),
@@ -113,7 +136,7 @@ export async function GET(request: NextRequest) {
         format: entry.format ?? "note",
         snippet: getSnippet(entry.content || "", query),
         // If query matches attachments, flag it
-        matchedAttachment: entry.attachments?.find((att: any) =>
+        matchedAttachment: entry.attachments?.find((att) =>
           att.name.toLowerCase().includes(query.toLowerCase())
         )?.name,
       };

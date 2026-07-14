@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
 import { dbConnect } from "@/lib/db";
 import { Session } from "@/models/Session";
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     await dbConnect();
 

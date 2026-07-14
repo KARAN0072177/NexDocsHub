@@ -136,7 +136,7 @@ function parseHtmlToTextBlocks(html: string): DocBlock[] {
   
   const blocks: DocBlock[] = [];
   
-  let cleaned = html
+  const cleaned = html
     .replace(/&nbsp;/g, " ")
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")

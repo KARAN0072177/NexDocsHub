@@ -9,6 +9,13 @@ import { Category } from "@/models/Category";
 import { Entry } from "@/models/Entry";
 import { entrySchema } from "@/features/entries/schemas/entry.schema";
 
+interface Attachment {
+  name: string;
+  url: string;
+  mimeType: string;
+  size: number;
+}
+
 const s3Client = new S3Client({
   region: process.env.AWS_REGION!,
   credentials: {
@@ -34,7 +41,7 @@ async function getAuthenticatedUserId(): Promise<string | null> {
   return sessionRecord.userId.toString();
 }
 
-async function signAttachments(attachments: any[]): Promise<any[]> {
+async function signAttachments(attachments: Attachment[]): Promise<Attachment[]> {
   return Promise.all(
     attachments.map(async (att) => {
       try {
@@ -206,7 +213,7 @@ export async function PUT(
     // Identify removed attachments to delete from S3 (compare permanent clean S3 URLs)
     const newUrls = new Set(cleanAttachments.map((a) => a.url));
     const removedAttachments = entry.attachments.filter(
-      (oldAtt: any) => !newUrls.has(oldAtt.url)
+      (oldAtt: Attachment) => !newUrls.has(oldAtt.url)
     );
 
     // Delete removed files from S3 bucket

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { LogOut, ChevronUp, Settings } from "lucide-react";
+import { LogOut, ChevronUp } from "lucide-react";
 
 interface ProfileMenuProps {
   user: {

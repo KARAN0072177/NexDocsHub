@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Search, Paperclip, Loader2, Command, CornerDownLeft, ArrowUp, ArrowDown } from "lucide-react";
+import { Search, Paperclip, Loader2, CornerDownLeft, ArrowUp, ArrowDown } from "lucide-react";
 
 import { typeConfig } from "@/features/entries/components/entry-list";
 
@@ -41,10 +41,12 @@ export function SearchModal({
   // Focus input on mount/open
   useEffect(() => {
     if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 50);
-      setQuery("");
-      setResults([]);
-      setFocusedIndex(0);
+      setTimeout(() => {
+        inputRef.current?.focus();
+        setQuery("");
+        setResults([]);
+        setFocusedIndex(0);
+      }, 50);
     }
   }, [isOpen]);
 
@@ -105,8 +107,10 @@ export function SearchModal({
   // Query API on text input change with AbortController
   useEffect(() => {
     if (query.trim().length < 2) {
-      setResults([]);
-      setIsLoading(false);
+      queueMicrotask(() => {
+        setResults([]);
+        setIsLoading(false);
+      });
       return;
     }
 
@@ -127,8 +131,8 @@ export function SearchModal({
         } else {
           setError(json.error?.message ?? "Search failed.");
         }
-      } catch (err: any) {
-        if (err.name !== "AbortError") {
+      } catch (err: unknown) {
+        if (!(err instanceof DOMException && err.name === "AbortError")) {
           console.error("Search API failed:", err);
           setError("Something went wrong.");
         }

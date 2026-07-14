@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useMemo, useState } from "react";
+import type { ReactNode } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { Markdown } from "tiptap-markdown";
@@ -15,7 +16,6 @@ import {
   Loader2,
   Trash2,
   Image as ImageIcon,
-  Paperclip,
   UploadCloud,
   File,
   Bold,
@@ -27,7 +27,6 @@ import {
   Heading1,
   Heading2,
   Quote,
-  Braces,
   Undo,
   Redo,
 } from "lucide-react";
@@ -60,6 +59,39 @@ interface EntryEditorProps {
   onCancel: () => void;
 }
 
+interface MarkdownStorage {
+  markdown?: {
+    getMarkdown?: () => string;
+  };
+}
+
+function ToolbarButton({
+  onClick,
+  isActive,
+  children,
+  title,
+}: {
+  onClick: () => void;
+  isActive?: boolean;
+  children: ReactNode;
+  title: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={title}
+      className={`rounded-lg p-1.5 transition text-xs font-semibold focus:outline-none border ${
+        isActive
+          ? "bg-blue-500/15 text-blue-400 border-blue-500/25 shadow-sm shadow-blue-500/10"
+          : "text-neutral-500 hover:bg-white/[0.05] hover:text-white border-transparent"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
 export function EntryEditor({
   categoryId,
   initialEntry,
@@ -83,17 +115,17 @@ export function EntryEditor({
   );
 
   const [isPreview, setIsPreview] = useState(false);
-  const [previewHtml, setPreviewHtml] = useState("");
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
   const [saveError, setSaveError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
+  const previewHtml = useMemo(() => {
     try {
-      setPreviewHtml(marked.parse(content) as string);
+      return marked.parse(content) as string;
     } catch (err) {
       console.error("Markdown parse error:", err);
+      return "";
     }
   }, [content]);
 
@@ -154,7 +186,8 @@ export function EntryEditor({
       },
     },
     onUpdate: ({ editor }) => {
-      setContent((editor.storage as any).markdown.getMarkdown());
+      const storage = editor.storage as MarkdownStorage;
+      setContent(storage.markdown?.getMarkdown?.() ?? editor.getText());
     },
   });
 
@@ -284,31 +317,6 @@ export function EntryEditor({
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
-
-  const ToolbarButton = ({
-    onClick,
-    isActive,
-    children,
-    title,
-  }: {
-    onClick: () => void;
-    isActive?: boolean;
-    children: React.ReactNode;
-    title: string;
-  }) => (
-    <button
-      type="button"
-      onClick={onClick}
-      title={title}
-      className={`rounded-lg p-1.5 transition text-xs font-semibold focus:outline-none border ${
-        isActive
-          ? "bg-blue-500/15 text-blue-400 border-blue-500/25 shadow-sm shadow-blue-500/10"
-          : "text-neutral-500 hover:bg-white/[0.05] hover:text-white border-transparent"
-      }`}
-    >
-      {children}
-    </button>
-  );
 
   return (
     <div className="flex flex-1 flex-col h-full overflow-hidden select-none">

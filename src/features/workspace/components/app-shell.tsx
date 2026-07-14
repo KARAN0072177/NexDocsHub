@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useCallback, useState, useEffect, useRef } from "react";
 import {
   Folder,
   Plus,
@@ -52,6 +52,11 @@ interface Entry {
   updatedAt: string;
 }
 
+interface SearchResult {
+  id: string;
+  categoryId: string;
+}
+
 interface AppShellProps {
   user: {
     username: string;
@@ -84,11 +89,11 @@ export function AppShell({ user, initialCategories }: AppShellProps) {
   const [view, setView] = useState<ActiveView>("LIST");
   const [activeEntry, setActiveEntry] = useState<Entry | null>(null);
 
-  // Reset page views when active category switches
-  useEffect(() => {
+  const selectCategory = (categoryId: string | null) => {
+    setSelectedCategoryId(categoryId);
     setView("LIST");
     setActiveEntry(null);
-  }, [selectedCategoryId]);
+  };
 
   // Floating Category Indicator Ball states & refs
   const sidebarRef = useRef<HTMLDivElement>(null);
@@ -99,7 +104,7 @@ export function AppShell({ user, initialCategories }: AppShellProps) {
     top: 0,
   });
 
-  const updateIndicator = () => {
+  const updateIndicator = useCallback(() => {
     if (!selectedCategoryId || !sidebarRef.current) {
       setIndicatorStyle((prev) => ({ ...prev, opacity: 0 }));
       return;
@@ -149,13 +154,13 @@ export function AppShell({ user, initialCategories }: AppShellProps) {
         ? "top 0.3s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.2s ease"
         : "opacity 0.2s ease",
     });
-  };
+  }, [selectedCategoryId]);
 
   useEffect(() => {
     updateIndicator();
     window.addEventListener("resize", updateIndicator);
     return () => window.removeEventListener("resize", updateIndicator);
-  }, [selectedCategoryId, sidebarOpen, categories]);
+  }, [selectedCategoryId, sidebarOpen, categories, updateIndicator]);
 
   useEffect(() => {
     const scrollEl = categoriesListRef.current;
@@ -163,7 +168,7 @@ export function AppShell({ user, initialCategories }: AppShellProps) {
       scrollEl.addEventListener("scroll", updateIndicator, { passive: true });
       return () => scrollEl.removeEventListener("scroll", updateIndicator);
     }
-  }, [selectedCategoryId, categories]);
+  }, [selectedCategoryId, categories, updateIndicator]);
 
   // Listen for Ctrl+K / Cmd+K global shortcuts
   useEffect(() => {
@@ -204,7 +209,7 @@ export function AppShell({ user, initialCategories }: AppShellProps) {
       isPinned: false,
     };
     setCategories((prev) => [fullCategory, ...prev]);
-    setSelectedCategoryId(fullCategory.id);
+    selectCategory(fullCategory.id);
   };
 
   const handleTogglePin = async (categoryId: string, isPinned: boolean) => {
@@ -239,7 +244,7 @@ export function AppShell({ user, initialCategories }: AppShellProps) {
     }
   };
 
-  const handleSelectSearchResult = async (result: any) => {
+  const handleSelectSearchResult = async (result: SearchResult) => {
     setIsSearchOpen(false);
     try {
       const res = await fetch(`/api/entries/${result.id}`);
@@ -297,7 +302,7 @@ export function AppShell({ user, initialCategories }: AppShellProps) {
         setCategories(remaining);
 
         if (selectedCategoryId === deletingCategory.id) {
-          setSelectedCategoryId(remaining[0]?.id ?? null);
+          selectCategory(remaining[0]?.id ?? null);
         }
 
         setDeletingCategory(null);
@@ -366,7 +371,7 @@ export function AppShell({ user, initialCategories }: AppShellProps) {
         }`}
       >
         <button
-          onClick={() => setSelectedCategoryId(category.id)}
+          onClick={() => selectCategory(category.id)}
           className={`flex flex-1 items-center gap-2.5 text-left transition min-w-0 ${
             isSelected ? "text-blue-300 font-semibold" : "text-neutral-400 hover:text-white"
           }`}
@@ -461,7 +466,7 @@ export function AppShell({ user, initialCategories }: AppShellProps) {
             <PanelLeft className="h-4.5 w-4.5" />
           </button>
           <div
-            onClick={() => setSelectedCategoryId(null)}
+            onClick={() => selectCategory(null)}
             className="flex items-center gap-2.5 cursor-pointer hover:opacity-90 active:scale-95 transition"
             title="Go to Dashboard"
           >
